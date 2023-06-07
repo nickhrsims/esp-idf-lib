@@ -1,4 +1,4 @@
-﻿# Process WAV Playback with Equalizer
+﻿# Process Audio with VIB
 
 ## Brief
 
