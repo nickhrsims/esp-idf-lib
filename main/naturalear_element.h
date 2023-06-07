@@ -35,6 +35,7 @@ extern "C"
 // -------------------------------------------------------------
 /**
  * @brief      Element Configuration
+ * NOTE: contents not specified adf api
  */
 typedef struct naturalear_audio_element_cfg {
     int samplerate;                          /* Audio sample rate (in Hz)*/

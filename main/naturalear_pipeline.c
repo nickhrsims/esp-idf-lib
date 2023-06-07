@@ -15,6 +15,10 @@
 
 static const char *TAG = "APP";
 
+// app_main:
+//     setup and then start pipeline
+//     then respond to events; stop event tears the system down
+
 void app_main(void)
 {
   // ---------------------------------
@@ -62,6 +66,7 @@ void app_main(void)
   // Pipeline Wiring
   // ---------------------------------
 
+  /* order doesn't matter when registering */
   ESP_LOGI(TAG, "[3.3] Register all elements to audio pipeline");
   audio_pipeline_register(pipeline, i2s_stream_reader, "i2s_read");
   audio_pipeline_register(pipeline, i2s_stream_writer, "i2s_write");
@@ -71,7 +76,9 @@ void app_main(void)
       TAG,
       "[3.4] Link it together "
       "[codec_chip]-->i2s_stream_reader-->naturalear-->i2s_stream_writer-->[codec_chip]");
+  /* specify sequence by names */
   const char* link_tags[3] = { "i2s_read", "filter", "i2s_write" };
+  /* register sequence */
   audio_pipeline_link(pipeline, &link_tags[0], 3);
 
 
@@ -96,6 +103,7 @@ void app_main(void)
   ESP_LOGI(TAG, "[ 6 ] Listen for all pipeline events");
   while (1) {
     audio_event_iface_msg_t msg;
+    /* blocking listen: */
     esp_err_t ret = audio_event_iface_listen(evt, &msg, portMAX_DELAY);
     if (ret != ESP_OK) {
       ESP_LOGE(TAG, "[ * ] Event interface error : %d", ret);

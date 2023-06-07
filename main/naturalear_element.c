@@ -17,24 +17,14 @@ static esp_err_t destroy(audio_element_handle_t self);
 static audio_element_err_t process(audio_element_handle_t self, char *input_buffer, int input_buffer_size);
 
 // -------------------------------------------------------------
-// Filter Data
-// -------------------------------------------------------------
-//
-// NOTE: It appears that the only reason this is needed is because a buffer is
-//       not prepared ahead of time
-//       (due to configuration parameters of underlying audio element handle)
-//
-//       No filter data is needed if a buffer length is chosen.
-
-// -------------------------------------------------------------
 // Initilize
 // -------------------------------------------------------------
-
 audio_element_handle_t naturalear_audio_element_init(naturalear_audio_element_cfg_t *naturalear_audio_element_cfg)
 {
     //
     // Check Configuration
     //
+    // not required by ADF!
     if (naturalear_audio_element_cfg == NULL) {
         ESP_LOGE(TAG, "ne_config is NULL. (line %d)", __LINE__);
         return NULL;
@@ -45,11 +35,13 @@ audio_element_handle_t naturalear_audio_element_init(naturalear_audio_element_cf
     //
     audio_element_cfg_t audio_element_cfg = DEFAULT_AUDIO_ELEMENT_CONFIG();
 
+    /* callback registration */
     audio_element_cfg.process = process;
     audio_element_cfg.open    = open;
     audio_element_cfg.close   = close;
     audio_element_cfg.destroy = destroy;
 
+    /* transfer buffer size in bytes */
     audio_element_cfg.buffer_len   = 256;
     audio_element_cfg.tag          = "naturalear";
 
