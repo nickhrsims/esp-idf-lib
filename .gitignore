@@ -1,0 +1,13 @@
+## Misc
+.DS_Store
+.idea
+*.log
+tmp/
+/main/#*#
+
+## Build Artifacts
+/build
+/.cache
+/dependencies.lock
+/managed_components
+/sdkconfig
