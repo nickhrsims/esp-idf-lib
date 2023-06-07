@@ -17,22 +17,27 @@ static const char *TAG = "APP";
 
 void app_main(void)
 {
-  audio_pipeline_handle_t pipeline;
-  audio_element_handle_t i2s_stream_writer, i2s_stream_reader, naturalear;
+  // ---------------------------------
+  // Logging
+  // ---------------------------------
 
   esp_log_level_set("*", ESP_LOG_INFO);
   esp_log_level_set(TAG, ESP_LOG_DEBUG);
 
-  ESP_LOGI(TAG, "[ 1 ] Start codec chip");
-  audio_board_handle_t board_handle = audio_board_init();
+  // ---------------------------------
+  // Initialization
+  // ---------------------------------
 
-#ifdef CONFIG_ESP32_S2_KALUGA_1_V1_2_BOARD
-  audio_hal_ctrl_codec(board_handle->audio_hal, AUDIO_HAL_CODEC_MODE_BOTH,
-                       AUDIO_HAL_CTRL_START);
-#else
+  audio_pipeline_handle_t pipeline;
+  audio_element_handle_t i2s_stream_writer, i2s_stream_reader, naturalear;
+
+  ESP_LOGI(TAG, "[ 1 ] Start codec chip");
+
+  // NOTE: Unused
+  audio_board_handle_t board_handle __attribute__((unused)) = audio_board_init();
+
   audio_hal_ctrl_codec(board_handle->audio_hal, AUDIO_HAL_CODEC_MODE_LINE_IN,
                        AUDIO_HAL_CTRL_START);
-#endif
 
   ESP_LOGI(TAG, "[ 2 ] Create audio pipeline for playback");
   audio_pipeline_cfg_t pipeline_cfg = DEFAULT_AUDIO_PIPELINE_CONFIG();
@@ -52,6 +57,11 @@ void app_main(void)
   naturalear_audio_element_cfg_t naturalear_cfg = DEFAULT_NATURALEAR_CONFIG();
   naturalear = naturalear_audio_element_init(&naturalear_cfg);
 
+
+  // ---------------------------------
+  // Pipeline Wiring
+  // ---------------------------------
+
   ESP_LOGI(TAG, "[3.3] Register all elements to audio pipeline");
   audio_pipeline_register(pipeline, i2s_stream_reader, "i2s_read");
   audio_pipeline_register(pipeline, i2s_stream_writer, "i2s_write");
@@ -64,6 +74,11 @@ void app_main(void)
   const char* link_tags[3] = { "i2s_read", "filter", "i2s_write" };
   audio_pipeline_link(pipeline, &link_tags[0], 3);
 
+
+  // ---------------------------------
+  // Event System Initialization
+  // ---------------------------------
+
   ESP_LOGI(TAG, "[ 4 ] Set up  event listener");
   audio_event_iface_cfg_t evt_cfg = AUDIO_EVENT_IFACE_DEFAULT_CFG();
   audio_event_iface_handle_t evt = audio_event_iface_init(&evt_cfg);
@@ -73,6 +88,10 @@ void app_main(void)
 
   ESP_LOGI(TAG, "[ 5 ] Start audio_pipeline");
   audio_pipeline_run(pipeline);
+
+  // ---------------------------------
+  // Event Handling
+  // ---------------------------------
 
   ESP_LOGI(TAG, "[ 6 ] Listen for all pipeline events");
   while (1) {
@@ -93,6 +112,7 @@ void app_main(void)
       ESP_LOGW(TAG, "[ * ] Stop event received");
       break;
     }
+
   }
 
   ESP_LOGI(TAG, "[ 7 ] Stop audio_pipeline");
