@@ -79,15 +79,16 @@ void app_main(void)
   // NOTE: Registration is order independent.
   audio_pipeline_register(pipeline, i2s_stream_reader, "i2s_read");
   audio_pipeline_register(pipeline, i2s_stream_writer, "i2s_write");
-  audio_pipeline_register(pipeline, vib, "filter");
+  audio_pipeline_register(pipeline, vib, "vib");
 
   ESP_LOGI(
       TAG,
       "[3.4] Link it together "
-      "[codec_chip]-->i2s_stream_reader-->vib-->i2s_stream_writer-->[codec_chip]");
+      "[codec_chip] -> i2s_stream_reader -> vib -> i2s_stream_writer -> [codec_chip]"
+  );
 
   // NOTE: Specify ordered sequence of tags.
-  const char* link_tags[3] = { "i2s_read", "filter", "i2s_write" };
+  const char* link_tags[3] = { "i2s_read", "vib", "i2s_write" };
   //       Connect elements in the pipeline; in order of passed sequence.
   audio_pipeline_link(pipeline, &link_tags[0], 3);
 
