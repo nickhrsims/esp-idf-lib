@@ -90,7 +90,6 @@ audio_element_handle_t vib_audio_element_init(vib_audio_element_cfg_t *vib_audio
 
 /// Audio Process Callback
 static audio_element_err_t process(audio_element_handle_t self, char *input_buffer, int input_buffer_length) {
-    ESP_LOGI(TAG, "Start of Process Callback");
     //
     // Get input buffer + size
     //
@@ -124,14 +123,12 @@ static audio_element_err_t process(audio_element_handle_t self, char *input_buff
             *(spool+1) = BYTE1(sample);
         }
 
-        ESP_LOGI(TAG, "Processed Audio (did nothing)");
         write_size = audio_element_output(self, input_buffer, read_size);
     } else {
-        ESP_LOGI(TAG, "Read Size is %d", read_size);
+        ESP_LOGW(TAG, "Read Size is %d", read_size);
         write_size = read_size;
     }
 
-    ESP_LOGI(TAG, "End of Process Callback");
     return write_size;
 }
 
