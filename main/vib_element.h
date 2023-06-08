@@ -54,13 +54,13 @@ typedef struct vib_audio_element_cfg {
 #define VIB_TASK_PRIORITY         (5)
 
 #define DEFAULT_VIB_CONFIG() {                                  \
-    .samplerate                        = 48000,                        \
-    .channels                          = 1,                            \
+    .samplerate                        = 48000,                 \
+    .channels                          = 1,                     \
     .output_ringbuffer_size            = VIB_RINGBUFFER_SIZE,   \
     .task_stack_size                   = VIB_TASK_STACK_SIZE,   \
     .task_core                         = VIB_TASK_CORE,         \
     .task_priority                     = VIB_TASK_PRIORITY,     \
-    .attempt_external_stack_allocation = true,                         \
+    .attempt_external_stack_allocation = true,                  \
 }
 
 
