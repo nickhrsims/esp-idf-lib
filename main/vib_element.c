@@ -6,7 +6,23 @@
 #include "vib_element.h"
 #include "audio_type_def.h"
 
+// -------------------------------------------------------------
+// Auxiliary
+// -------------------------------------------------------------
+#define BYTE0(object) (char)object
+#define BYTE1(object) (char)((int16_t)object >> 8)
+#define WORD(byte0, byte1) ((int16_t)(byte1 << 8) | byte0)
+
+// -------------------------------------------------------------
+// Constants
+// -------------------------------------------------------------
 static const char *TAG = "VIB";
+
+// -------------------------------------------------------------
+// Types
+// -------------------------------------------------------------
+typedef int16_t audio_sample_t;
+typedef int8_t audio_sample_byte_t;
 
 // -------------------------------------------------------------
 // Forward Declarations
@@ -16,10 +32,10 @@ static esp_err_t close(audio_element_handle_t self);
 static esp_err_t destroy(audio_element_handle_t self);
 static audio_element_err_t process(audio_element_handle_t self, char *input_buffer, int input_buffer_size);
 
+
 // -------------------------------------------------------------
 // Initilize
 // -------------------------------------------------------------
-
 audio_element_handle_t vib_audio_element_init(vib_audio_element_cfg_t *vib_audio_element_cfg)
 {
     //
@@ -44,7 +60,7 @@ audio_element_handle_t vib_audio_element_init(vib_audio_element_cfg_t *vib_audio
     audio_element_cfg.destroy = destroy;
 
     // Input buffer size (in bytes)
-    audio_element_cfg.buffer_len   = 256;
+    audio_element_cfg.buffer_len   = vib_audio_element_cfg->output_ringbuffer_size;
     audio_element_cfg.tag          = "vib";
 
 
@@ -95,6 +111,19 @@ static audio_element_err_t process(audio_element_handle_t self, char *input_buff
     //   see: `audio_element_err_t`
     //
     if (read_size > 0) {
+
+        const double gain = 1.0;
+
+        for (char *spool = input_buffer;
+             spool != input_buffer + input_buffer_length;
+             spool += 2) {
+
+            audio_sample_t sample = WORD(*spool, *(spool+1)) * gain;
+
+            *spool     = BYTE0(sample);
+            *(spool+1) = BYTE1(sample);
+        }
+
         ESP_LOGI(TAG, "Processed Audio (did nothing)");
         write_size = audio_element_output(self, input_buffer, read_size);
     } else {
