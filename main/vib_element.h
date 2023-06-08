@@ -1,4 +1,4 @@
-// naturalear_element.h
+// vib_element.h
 //
 // @author     Nicholas H.R. Sims
 //
@@ -13,8 +13,8 @@
 // @see        esp-adf/components/esp-adf-libs/esp_codec/include/codec/equilizer.h
 // @see        esp-adf/examples/audio_processing/pipeline_equilizer/README.md
 //
-#ifndef NATURALEAR_ELEMENT_H_
-#define NATURALEAR_ELEMENT_H_
+#ifndef VIB_ELEMENT_H_
+#define VIB_ELEMENT_H_
 
 #include "esp_err.h"
 #include "audio_element.h"
@@ -35,9 +35,10 @@ extern "C"
 // -------------------------------------------------------------
 /**
  * @brief      Element Configuration
- * NOTE: contents not specified adf api
+ *
+ * NOTE: Contents not specified by ADF API.
  */
-typedef struct naturalear_audio_element_cfg {
+typedef struct vib_audio_element_cfg {
     int samplerate;                          /* Audio sample rate (in Hz)*/
     int channels;                            /* Number of audio channels (Mono=1, Dual=2) */
     int output_ringbuffer_size;              /* Size of output ring buffer */
@@ -45,20 +46,20 @@ typedef struct naturalear_audio_element_cfg {
     int task_core;                           /* Task running in core...*/
     int task_priority;                       /* Task priority */
     bool attempt_external_stack_allocation;  /* Try to allocate stack in external memory */
-} naturalear_audio_element_cfg_t;
+} vib_audio_element_cfg_t;
 
-#define NATURALEAR_RINGBUFFER_SIZE       (8 * 1024)
-#define NATURALEAR_TASK_STACK_SIZE       (4 * 1024)
-#define NATURALEAR_TASK_CORE             (0)
-#define NATURALEAR_TASK_PRIORITY         (5)
+#define VIB_RINGBUFFER_SIZE       (8 * 1024)
+#define VIB_TASK_STACK_SIZE       (4 * 1024)
+#define VIB_TASK_CORE             (0)
+#define VIB_TASK_PRIORITY         (5)
 
-#define DEFAULT_NATURALEAR_CONFIG() {                                  \
+#define DEFAULT_VIB_CONFIG() {                                  \
     .samplerate                        = 48000,                        \
     .channels                          = 1,                            \
-    .output_ringbuffer_size            = NATURALEAR_RINGBUFFER_SIZE,   \
-    .task_stack_size                   = NATURALEAR_TASK_STACK_SIZE,   \
-    .task_core                         = NATURALEAR_TASK_CORE,         \
-    .task_priority                     = NATURALEAR_TASK_PRIORITY,     \
+    .output_ringbuffer_size            = VIB_RINGBUFFER_SIZE,   \
+    .task_stack_size                   = VIB_TASK_STACK_SIZE,   \
+    .task_core                         = VIB_TASK_CORE,         \
+    .task_priority                     = VIB_TASK_PRIORITY,     \
     .attempt_external_stack_allocation = true,                         \
 }
 
@@ -68,7 +69,7 @@ typedef struct naturalear_audio_element_cfg {
 // External Functions
 // -------------------------------------------------------------
 
-audio_element_handle_t naturalear_audio_element_init(naturalear_audio_element_cfg_t *config);
+audio_element_handle_t vib_audio_element_init(vib_audio_element_cfg_t *config);
 
 
 /* ========================================================================== *\
@@ -81,4 +82,4 @@ audio_element_handle_t naturalear_audio_element_init(naturalear_audio_element_cf
 }
 #endif
 
-#endif // NATURALEAR_ELEMENT_H_
+#endif // VIB_ELEMENT_H_

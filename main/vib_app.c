@@ -2,7 +2,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_log.h"
-#include "naturalear_element.h"
+#include "vib_element.h"
 #include "nvs_flash.h"
 #include "sdkconfig.h"
 #include "audio_element.h"
@@ -15,10 +15,18 @@
 
 static const char *TAG = "APP";
 
-// app_main:
-//     setup and then start pipeline
-//     then respond to events; stop event tears the system down
-
+/**
+ * @brief      Setup and then start the pipline.
+ *
+ *             Project entry point (main).
+ *             Create, and confgure pipeline, i2s_{in,out}, and vib.
+ *             Wire pipeline:
+ *
+ *                 [i2s_in] ---> [vib] ---> [i2s_out]
+ *
+ *             Respond to events
+ *                 _stop_ event tears down system
+ */
 void app_main(void)
 {
   // ---------------------------------
@@ -33,7 +41,7 @@ void app_main(void)
   // ---------------------------------
 
   audio_pipeline_handle_t pipeline;
-  audio_element_handle_t i2s_stream_writer, i2s_stream_reader, naturalear;
+  audio_element_handle_t i2s_stream_writer, i2s_stream_reader, vib;
 
   ESP_LOGI(TAG, "[ 1 ] Start codec chip");
 
@@ -58,27 +66,29 @@ void app_main(void)
   i2s_stream_reader = i2s_stream_init(&i2s_cfg_read);
 
   ESP_LOGI(TAG, "[3.3] Create ne filter to process stream");
-  naturalear_audio_element_cfg_t naturalear_cfg = DEFAULT_NATURALEAR_CONFIG();
-  naturalear = naturalear_audio_element_init(&naturalear_cfg);
+  vib_audio_element_cfg_t vib_cfg = DEFAULT_VIB_CONFIG();
+  vib = vib_audio_element_init(&vib_cfg);
 
 
   // ---------------------------------
   // Pipeline Wiring
   // ---------------------------------
 
-  /* order doesn't matter when registering */
   ESP_LOGI(TAG, "[3.3] Register all elements to audio pipeline");
+
+  // NOTE: Registration is order independent.
   audio_pipeline_register(pipeline, i2s_stream_reader, "i2s_read");
   audio_pipeline_register(pipeline, i2s_stream_writer, "i2s_write");
-  audio_pipeline_register(pipeline, naturalear, "filter");
+  audio_pipeline_register(pipeline, vib, "filter");
 
   ESP_LOGI(
       TAG,
       "[3.4] Link it together "
-      "[codec_chip]-->i2s_stream_reader-->naturalear-->i2s_stream_writer-->[codec_chip]");
-  /* specify sequence by names */
+      "[codec_chip]-->i2s_stream_reader-->vib-->i2s_stream_writer-->[codec_chip]");
+
+  // NOTE: Specify ordered sequence of tags.
   const char* link_tags[3] = { "i2s_read", "filter", "i2s_write" };
-  /* register sequence */
+  //       Connect elements in the pipeline; in order of passed sequence.
   audio_pipeline_link(pipeline, &link_tags[0], 3);
 
 
@@ -103,8 +113,10 @@ void app_main(void)
   ESP_LOGI(TAG, "[ 6 ] Listen for all pipeline events");
   while (1) {
     audio_event_iface_msg_t msg;
-    /* blocking listen: */
+
+    // NOTE: Blocking call.
     esp_err_t ret = audio_event_iface_listen(evt, &msg, portMAX_DELAY);
+
     if (ret != ESP_OK) {
       ESP_LOGE(TAG, "[ * ] Event interface error : %d", ret);
       continue;
@@ -129,7 +141,7 @@ void app_main(void)
   audio_pipeline_terminate(pipeline);
 
   audio_pipeline_unregister(pipeline, i2s_stream_reader);
-  audio_pipeline_unregister(pipeline, naturalear);
+  audio_pipeline_unregister(pipeline, vib);
   audio_pipeline_unregister(pipeline, i2s_stream_writer);
 
   /* Terminate the pipeline before removing the listener */
@@ -143,6 +155,6 @@ void app_main(void)
   /* Release all resources */
   audio_pipeline_deinit(pipeline);
   audio_element_deinit(i2s_stream_reader);
-  audio_element_deinit(naturalear);
+  audio_element_deinit(vib);
   audio_element_deinit(i2s_stream_writer);
 }

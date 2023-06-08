@@ -3,10 +3,10 @@
 #include "audio_error.h"
 #include "audio_mem.h"
 #include "audio_element.h"
-#include "naturalear_element.h"
+#include "vib_element.h"
 #include "audio_type_def.h"
 
-static const char *TAG = "NATURALEAR";
+static const char *TAG = "VIB";
 
 // -------------------------------------------------------------
 // Forward Declarations
@@ -19,13 +19,15 @@ static audio_element_err_t process(audio_element_handle_t self, char *input_buff
 // -------------------------------------------------------------
 // Initilize
 // -------------------------------------------------------------
-audio_element_handle_t naturalear_audio_element_init(naturalear_audio_element_cfg_t *naturalear_audio_element_cfg)
+
+audio_element_handle_t vib_audio_element_init(vib_audio_element_cfg_t *vib_audio_element_cfg)
 {
     //
     // Check Configuration
     //
-    // not required by ADF!
-    if (naturalear_audio_element_cfg == NULL) {
+
+    // NOTE: Not part of the ADF!
+    if (vib_audio_element_cfg == NULL) {
         ESP_LOGE(TAG, "ne_config is NULL. (line %d)", __LINE__);
         return NULL;
     }
@@ -35,25 +37,25 @@ audio_element_handle_t naturalear_audio_element_init(naturalear_audio_element_cf
     //
     audio_element_cfg_t audio_element_cfg = DEFAULT_AUDIO_ELEMENT_CONFIG();
 
-    /* callback registration */
+    // Callback Registration
     audio_element_cfg.process = process;
     audio_element_cfg.open    = open;
     audio_element_cfg.close   = close;
     audio_element_cfg.destroy = destroy;
 
-    /* transfer buffer size in bytes */
+    // Input buffer size (in bytes)
     audio_element_cfg.buffer_len   = 256;
-    audio_element_cfg.tag          = "naturalear";
+    audio_element_cfg.tag          = "vib";
 
 
     // NOTE: These can probably be removed, as they aren't subject to current configuration.
-    // (i.e. allow these to be populated by defaults factory macro)
-    audio_element_cfg.task_stack   = naturalear_audio_element_cfg->task_stack_size;
-    audio_element_cfg.task_prio    = naturalear_audio_element_cfg->task_priority;
-    audio_element_cfg.task_core    = naturalear_audio_element_cfg->task_core;
-    audio_element_cfg.task_core    = naturalear_audio_element_cfg->task_core;
-    audio_element_cfg.out_rb_size  = naturalear_audio_element_cfg->output_ringbuffer_size;
-    audio_element_cfg.stack_in_ext = naturalear_audio_element_cfg->attempt_external_stack_allocation;
+    // (i.e. allow these to be populated by defaults factory macro) -nick
+    audio_element_cfg.task_stack   = vib_audio_element_cfg->task_stack_size;
+    audio_element_cfg.task_prio    = vib_audio_element_cfg->task_priority;
+    audio_element_cfg.task_core    = vib_audio_element_cfg->task_core;
+    audio_element_cfg.task_core    = vib_audio_element_cfg->task_core;
+    audio_element_cfg.out_rb_size  = vib_audio_element_cfg->output_ringbuffer_size;
+    audio_element_cfg.stack_in_ext = vib_audio_element_cfg->attempt_external_stack_allocation;
 
     //
     // Build Base Audio Element

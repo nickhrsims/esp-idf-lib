@@ -1,6 +1,6 @@
 set(COMPONENT_SRCS
-  "naturalear_pipeline.c"
-  "naturalear_element.c"
+  "vib_app.c"
+  "vib_element.c"
 )
 set(COMPONENT_ADD_INCLUDEDIRS .)
 
