@@ -1,10 +1,24 @@
-#include <string.h>
-#include "esp_log.h"
-#include "audio_error.h"
-#include "audio_mem.h"
+// vib_audio_element.h
+//
+// @author     Nicholas H.R. Sims
+//
+// @brief      Custom Audio Element based on the Equilizer Audio Element
+//             provided with the ESP ADF Audio Codec Library
+//
+//             Much of this file's content was taken right out of the original
+//             element. New components can be created from this foundation
+//             (or better, from the Codec library examples)
+//
+// @see        https://github.com/espressif/esp-adf.git
+// @see esp-adf/components/esp-adf-libs/esp_codec/include/codec/equilizer.h
+// @see        esp-adf/examples/audio_processing/pipeline_equilizer/README.md
+
 #include "audio_element.h"
-#include "vib_element.h"
-#include "audio_type_def.h"
+#include "audio_error.h"
+#include "esp_log.h"
+#include <string.h>
+
+#include "vib_audio_element.h"
 
 // -------------------------------------------------------------
 // Auxiliary
@@ -30,14 +44,14 @@ typedef int8_t audio_sample_byte_t;
 static esp_err_t open(audio_element_handle_t self);
 static esp_err_t close(audio_element_handle_t self);
 static esp_err_t destroy(audio_element_handle_t self);
-static audio_element_err_t process(audio_element_handle_t self, char *input_buffer, int input_buffer_size);
-
+static audio_element_err_t process(audio_element_handle_t self,
+                                   char *input_buffer, int input_buffer_size);
 
 // -------------------------------------------------------------
 // Initilize
 // -------------------------------------------------------------
-audio_element_handle_t vib_audio_element_init(vib_audio_element_cfg_t *vib_audio_element_cfg)
-{
+audio_element_handle_t
+vib_audio_element_init(vib_audio_element_cfg_t *vib_audio_element_cfg) {
     //
     // Check Configuration
     //
@@ -55,30 +69,34 @@ audio_element_handle_t vib_audio_element_init(vib_audio_element_cfg_t *vib_audio
 
     // Callback Registration
     audio_element_cfg.process = process;
-    audio_element_cfg.open    = open;
-    audio_element_cfg.close   = close;
+    audio_element_cfg.open = open;
+    audio_element_cfg.close = close;
     audio_element_cfg.destroy = destroy;
 
     // Input buffer size (in bytes)
-    audio_element_cfg.buffer_len   = vib_audio_element_cfg->output_ringbuffer_size;
-    audio_element_cfg.tag          = "vib";
+    audio_element_cfg.buffer_len =
+        vib_audio_element_cfg->output_ringbuffer_size;
+    audio_element_cfg.tag = "vib";
 
-
-    // NOTE: These can probably be removed, as they aren't subject to current configuration.
-    // (i.e. allow these to be populated by defaults factory macro) -nick
-    audio_element_cfg.task_stack   = vib_audio_element_cfg->task_stack_size;
-    audio_element_cfg.task_prio    = vib_audio_element_cfg->task_priority;
-    audio_element_cfg.task_core    = vib_audio_element_cfg->task_core;
-    audio_element_cfg.task_core    = vib_audio_element_cfg->task_core;
-    audio_element_cfg.out_rb_size  = vib_audio_element_cfg->output_ringbuffer_size;
-    audio_element_cfg.stack_in_ext = vib_audio_element_cfg->attempt_external_stack_allocation;
+    // NOTE: These can probably be removed, as they aren't subject to
+    // current configuration. (i.e. allow these to be populated by defaults
+    // factory macro) -nick
+    audio_element_cfg.task_stack = vib_audio_element_cfg->task_stack_size;
+    audio_element_cfg.task_prio = vib_audio_element_cfg->task_priority;
+    audio_element_cfg.task_core = vib_audio_element_cfg->task_core;
+    audio_element_cfg.task_core = vib_audio_element_cfg->task_core;
+    audio_element_cfg.out_rb_size =
+        vib_audio_element_cfg->output_ringbuffer_size;
+    audio_element_cfg.stack_in_ext =
+        vib_audio_element_cfg->attempt_external_stack_allocation;
 
     //
     // Build Base Audio Element
     //
-    audio_element_handle_t audio_element_handle = audio_element_init(&audio_element_cfg);
+    audio_element_handle_t audio_element_handle =
+        audio_element_init(&audio_element_cfg);
 
-    AUDIO_MEM_CHECK(TAG, audio_element_handle, {return NULL;});
+    AUDIO_MEM_CHECK(TAG, audio_element_handle, { return NULL; });
     ESP_LOGI(TAG, "Initialized");
 
     return audio_element_handle;
@@ -89,11 +107,14 @@ audio_element_handle_t vib_audio_element_init(vib_audio_element_cfg_t *vib_audio
 // -------------------------------------------------------------
 
 /// Audio Process Callback
-static audio_element_err_t process(audio_element_handle_t self, char *input_buffer, int input_buffer_length) {
+static audio_element_err_t process(audio_element_handle_t self,
+                                   char *input_buffer,
+                                   int input_buffer_length) {
     //
     // Get input buffer + size
     //
-    int read_size = audio_element_input(self, input_buffer, input_buffer_length);
+    int read_size =
+        audio_element_input(self, input_buffer, input_buffer_length);
 
     //
     // Default write buffer size
@@ -114,13 +135,12 @@ static audio_element_err_t process(audio_element_handle_t self, char *input_buff
         const double gain = 1.0;
 
         for (char *spool = input_buffer;
-             spool != input_buffer + input_buffer_length;
-             spool += 2) {
+             spool != input_buffer + input_buffer_length; spool += 2) {
 
-            audio_sample_t sample = WORD(*spool, *(spool+1)) * gain;
+            audio_sample_t sample = WORD(*spool, *(spool + 1)) * gain;
 
-            *spool     = BYTE0(sample);
-            *(spool+1) = BYTE1(sample);
+            *spool = BYTE0(sample);
+            *(spool + 1) = BYTE1(sample);
         }
 
         write_size = audio_element_output(self, input_buffer, read_size);
@@ -131,7 +151,6 @@ static audio_element_err_t process(audio_element_handle_t self, char *input_buff
 
     return write_size;
 }
-
 
 // -------------------------------------------------------------
 // Open / Close / Destroy
