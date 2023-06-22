@@ -51,26 +51,26 @@ static audio_event_iface_handle_t evt;
 // Forwarded Declarations
 // -------------------------------------------------------------
 
-static void initialize(void);
-static void listen(void);
-static void terminate(void);
+static void vib_audio_pipeline_init(void);
+static void vib_audio_pipeline_listen(void);
+static void vib_audio_pipeline_deinit(void);
 
 // -------------------------------------------------------------
 // Entry-point (Managed Procedures)
 // -------------------------------------------------------------
 
 /// Primary pipeline task to be called by a scheduler.
-void app_audio_pipeline_task(void *_) {
+void vib_audio_pipeline_task(void *_) {
     // Setup/Start the pipeline.
-    initialize();
+    vib_audio_pipeline_init();
 
     // Block-and-loop while waiting for events.
     // Audio elements are pushed scheduled in a dedicated audio thread.
     // Returns when a stop event is received.
-    listen();
+    vib_audio_pipeline_listen();
 
     // Stop/Teardown the pipeline.
-    terminate();
+    vib_audio_pipeline_deinit();
 }
 
 // -------------------------------------------------------------
@@ -86,7 +86,7 @@ void app_audio_pipeline_task(void *_) {
  *
  *                 [i2s_in] ---> [vib] ---> [i2s_out]
  */
-static void initialize(void) {
+static void vib_audio_pipeline_init(void) {
     // ---------------------------------
     // Logging
     // ---------------------------------
@@ -128,7 +128,7 @@ static void initialize(void) {
     // --- Initialize VIB audio stream processor.
     ESP_LOGI(TAG, "[3.3] Create vib filter to process stream");
     vib_audio_element_cfg_t vib_cfg = DEFAULT_VIB_CONFIG();
-    vib = vib_audio_element_initialize(&vib_cfg);
+    vib = vib_audio_element_init(&vib_cfg);
 
     // ---------------------------------
     // Pipeline Wiring
@@ -179,7 +179,7 @@ static void initialize(void) {
  *             Respond to events
  *                 _stop_ event breaks loop
  */
-static void listen(void) {
+static void vib_audio_pipeline_listen(void) {
     // ---------------------------------
     // Event Handling
     // ---------------------------------
@@ -217,7 +217,7 @@ static void listen(void) {
  * @brief       Terminate the pipeline and clean-up memory.
  *
  */
-static void terminate(void) {
+static void vib_audio_pipeline_deinit(void) {
     ESP_LOGI(TAG, "[ 7 ] Stop audio_pipeline");
     audio_pipeline_stop(pipeline);
     audio_pipeline_wait_for_stop(pipeline);
