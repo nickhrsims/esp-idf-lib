@@ -1,3 +1,7 @@
+/// main.c
+///
+/// @brief       Houses application entry-point.
+
 #include "esp_task.h"
 #include "freertos/task.h"
 

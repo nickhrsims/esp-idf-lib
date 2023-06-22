@@ -1,16 +1,15 @@
-// pipeline.c
-//
-// @author     Nicholas H.R. Sims
-//
-// @brief      Audio pipeline configuration based on the Equilizer example
-//             provided with the ESP ADF.
-//
-//             Much of this file's content was taken right out of the original
-//             module.
-//
-// @see        https://github.com/espressif/esp-adf.git
-// @see        esp-adf/examples/audio_processing/pipeline_equilizer/README.md
-//
+/// vib_audio_pipeline.c
+///
+/// @author     Nicholas H.R. Sims
+///
+/// @brief      Audio pipeline configuration based on the Equilizer example
+///             provided with the ESP ADF.
+///
+///             Much of this file's content was taken right out of the original
+///             module.
+///
+/// @see        https://github.com/espressif/esp-adf.git
+/// @see        esp-adf/examples/audio_processing/pipeline_equilizer/README.md
 
 #include "audio_common.h"
 #include "audio_element.h"

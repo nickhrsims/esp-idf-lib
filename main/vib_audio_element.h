@@ -1,17 +1,17 @@
-// vib_audio_element.h
-//
-// @author     Nicholas H.R. Sims
-//
-// @brief      Custom Audio Element based on the Equilizer Audio Element
-//             provided with the ESP ADF Audio Codec Library
-//
-//             Much of this file's content was taken right out of the original
-//             element. New components can be created from this foundation
-//             (or better, from the Codec library examples)
-//
-// @see        https://github.com/espressif/esp-adf.git
-// @see esp-adf/components/esp-adf-libs/esp_codec/include/codec/equilizer.h
-// @see        esp-adf/examples/audio_processing/pipeline_equilizer/README.md
+/// vib_audio_element.h
+///
+/// @author     Nicholas H.R. Sims
+///
+/// @brief      Custom Audio Element based on the Equilizer Audio Element
+///             provided with the ESP ADF Audio Codec Library
+///
+///             Much of this file's content was taken right out of the original
+///             element. New components can be created from this foundation
+///             (or better, from the Codec library examples)
+///
+/// @see    https://github.com/espressif/esp-adf.git
+/// @see    esp-adf/components/esp-adf-libs/esp_codec/include/codec/equilizer.h
+/// @see    esp-adf/examples/audio_processing/pipeline_equilizer/README.md
 
 #ifndef VIB_AUDIO_ELEMENT_H_
 #define VIB_AUDIO_ELEMENT_H_
