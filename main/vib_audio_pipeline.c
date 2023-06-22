@@ -21,8 +21,8 @@
 #include "i2s_stream.h"
 #include <string.h>
 
-#include "pipeline.h"
 #include "vib_audio_element.h"
+#include "vib_audio_pipeline.h"
 
 // -------------------------------------------------------------
 // Module-Static Data

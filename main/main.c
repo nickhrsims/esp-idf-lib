@@ -1,7 +1,7 @@
 #include "esp_task.h"
 #include "freertos/task.h"
 
-#include "audio/pipeline.h"
+#include "vib_audio_pipeline.h"
 
 #define APP_AUDIO_PIPELINE_TASK_STACK_SIZE (1024 * 8)
 #define APP_AUDIO_PIPELINE_TASK_PARAM_COUNT 0

@@ -13,8 +13,8 @@
 // @see esp-adf/components/esp-adf-libs/esp_codec/include/codec/equilizer.h
 // @see        esp-adf/examples/audio_processing/pipeline_equilizer/README.md
 
-#ifndef VIB_ELEMENT_H_
-#define VIB_ELEMENT_H_
+#ifndef VIB_AUDIO_ELEMENT_H_
+#define VIB_AUDIO_ELEMENT_H_
 
 #include "audio_element.h"
 
@@ -77,4 +77,4 @@ audio_element_handle_t vib_audio_element_init(vib_audio_element_cfg_t *config);
 }
 #endif
 
-#endif // VIB_ELEMENT_H_
+#endif // VIB_AUDIO_ELEMENT_H_
