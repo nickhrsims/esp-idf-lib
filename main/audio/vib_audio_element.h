@@ -65,8 +65,7 @@ typedef struct vib_audio_element_cfg {
 // External Functions
 // -------------------------------------------------------------
 
-audio_element_handle_t
-vib_audio_element_initialize(vib_audio_element_cfg_t *config);
+audio_element_handle_t vib_audio_element_init(vib_audio_element_cfg_t *config);
 
 /* ========================================================================== *\
   / - - - - - - - - - - - - - - - -  - - - - - - - - - - - - - - - - - - - - \
