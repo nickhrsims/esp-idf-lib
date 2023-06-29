@@ -19,12 +19,13 @@
 #include <string.h>
 
 #include "vib_audio_element.h"
+#include "vib_audio_params.h"
 
 // -------------------------------------------------------------
 // Auxiliary
 // -------------------------------------------------------------
-#define BYTE0(object) (char)object
-#define BYTE1(object) (char)((int16_t)object >> 8)
+#define BYTE0(object)      (char)object
+#define BYTE1(object)      (char)((int16_t)object >> 8)
 #define WORD(byte0, byte1) ((int16_t)(byte1 << 8) | byte0)
 
 // -------------------------------------------------------------
@@ -69,8 +70,8 @@ vib_audio_element_init(vib_audio_element_cfg_t *vib_audio_element_cfg) {
 
     // Callback Registration
     audio_element_cfg.process = process;
-    audio_element_cfg.open = open;
-    audio_element_cfg.close = close;
+    audio_element_cfg.open    = open;
+    audio_element_cfg.close   = close;
     audio_element_cfg.destroy = destroy;
 
     // Input buffer size (in bytes)
@@ -82,9 +83,9 @@ vib_audio_element_init(vib_audio_element_cfg_t *vib_audio_element_cfg) {
     // current configuration. (i.e. allow these to be populated by defaults
     // factory macro) -nick
     audio_element_cfg.task_stack = vib_audio_element_cfg->task_stack_size;
-    audio_element_cfg.task_prio = vib_audio_element_cfg->task_priority;
-    audio_element_cfg.task_core = vib_audio_element_cfg->task_core;
-    audio_element_cfg.task_core = vib_audio_element_cfg->task_core;
+    audio_element_cfg.task_prio  = vib_audio_element_cfg->task_priority;
+    audio_element_cfg.task_core  = vib_audio_element_cfg->task_core;
+    audio_element_cfg.task_core  = vib_audio_element_cfg->task_core;
     audio_element_cfg.out_rb_size =
         vib_audio_element_cfg->output_ringbuffer_size;
     audio_element_cfg.stack_in_ext =
@@ -132,14 +133,13 @@ static audio_element_err_t process(audio_element_handle_t self,
     //
     if (read_size > 0) {
 
-        const double gain = 1.0;
-
         for (char *spool = input_buffer;
              spool != input_buffer + input_buffer_length; spool += 2) {
 
-            audio_sample_t sample = WORD(*spool, *(spool + 1)) * gain;
+            audio_sample_t sample =
+                WORD(*spool, *(spool + 1)) * vib_audio_param_gain;
 
-            *spool = BYTE0(sample);
+            *spool       = BYTE0(sample);
             *(spool + 1) = BYTE1(sample);
         }
 
