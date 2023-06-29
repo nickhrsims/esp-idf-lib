@@ -2,4 +2,22 @@
 BasedOnStyle: LLVM
 IndentWidth: 4
 PointerAlignment: Right
+
+AlignConsecutiveMacros:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: false
+
+AlignConsecutiveAssignments:
+  Enabled: true
+  AcrossEmptyLines: false
+  AcrossComments: false
+
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterEnum: false
+  AfterStruct: false
+  SplitEmptyFunction: false
+
+BracedInitializerIndentWidth: 4
 ...
