@@ -13,8 +13,12 @@
 // Wraps an 8-bit attribute UUID within a base UUID.
 //
 // Format:
-//     XX - 8-bit Internal Service UUID
+//     XX - 8-bit Service Index
+//     YY - 8-bit Characteristic Index
 //     C2D5B9D6-XXYY-452E-84D1-0A0C537A36D7
+//
+//     XX: INDEX 11
+//     YY: INDEX 10
 //
 // Usage:
 //     WITH_BASE_UUID(my_unsigned_8bit_uuid)
