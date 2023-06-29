@@ -23,7 +23,7 @@
 #define VIB_BLE_UUID_128(XX, YY)                                               \
     /* NOTE: Do not remove the type-hint from this struct initializer */       \
     (uint8_t[16]) {                                                            \
-        0xD7, 0x36, 0x7A, 0x53, 0x0C, 0x0A, 0xD1, 0x84, 0x2E, 0x45, XX, YY,    \
+        0xD7, 0x36, 0x7A, 0x53, 0x0C, 0x0A, 0xD1, 0x84, 0x2E, 0x45, YY, XX,    \
             0xD6, 0xB9, 0xD5, 0xC2                                             \
     }
 
