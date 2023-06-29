@@ -21,7 +21,7 @@
 //     YY: INDEX 10
 //
 // Usage:
-//     WITH_BASE_UUID(my_unsigned_8bit_uuid)
+//     VIB_BLE_UUID_128(service_index, characteristic_index)
 //
 // @see https://www.uuidgenerator.net/
 #define VIB_BLE_UUID_128(XX, YY)                                               \
