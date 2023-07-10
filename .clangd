@@ -1,6 +1,6 @@
 CompileFlags:
   Compiler: /opt/esp/tools/xtensa-esp32-elf/esp-12.2.0_20230208/xtensa-esp32-elf/bin/xtensa-esp32-elf-gcc
-  Add: [-Wno-unknown-warning-option, -DCONFIG_LOG_MASTER_LEVEL=1, -DCONFIG_LOG_MAXIMUM_LEVEL=1, -DCONFIG_LOG_TIMESTAMP_SOURCE_RTOS=1, -I/opt/esp/idf/components/esp_common/include, -Wno-deprecated-declarations]
+  Add: [-Wno-unknown-warning-option, -DCONFIG_LOG_MASTER_LEVEL=1, -DCONFIG_LOG_MAXIMUM_LEVEL=1, -DCONFIG_LOG_TIMESTAMP_SOURCE_RTOS=1, -I/opt/esp/idf/components/esp_common/include, -Wno-deprecated-declarations -Wunused-function]
   Remove: [-fstrict-volatile-bitfields, -fno-tree-switch-conversion, -mlongcalls]
 Diagnostics:
   Suppress: [drv_unknown_argument, pp_file_not_found]
