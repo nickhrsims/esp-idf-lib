@@ -10,17 +10,49 @@
 
 #include "esp_gatt_defs.h"
 
+#include "esp_log.h"
 #include "vib_ble_cfg.h"
 #include "vib_ble_gatt_table.h"
-#include "vib_ble_gatt_table_defs.h"
+
+static const char *TAG = "VIB_BLE_GATT_TABLE";
 
 // -------------------------------------------------------------
-// Prototypes
+// Attribute Handle Utilities
 // -------------------------------------------------------------
 
-// --- Attributes
-vib_ble_gatt_table_t *vib_ble_gatt_table_init(const vib_ble_cfg_dev_t *dev_cfg);
-void vib_ble_gatt_table_deinit(vib_ble_gatt_table_t *attr_tab);
+/**
+ * @brief       Get the length of memory required for a GATT table
+ *              based on a device configuration structure.
+ *
+ *              This length is also used to hold attribute handles,
+ *              and can be used to determine how many 2-byte memory cells are
+ *              needed to create a handle-to-configuration-entry map.
+ */
+static uint8_t handle_buffer_range(const vib_ble_cfg_dev_t *const dev_cfg) {
+
+    // --- 2-byte wide handles (uint16_t)
+    static const uint8_t handle_size = 2;
+
+    // One handle per service.
+    uint8_t length = dev_cfg->svc_tab_len;
+
+    for (uint8_t index = 0; index < dev_cfg->svc_tab_len; index++) {
+        // Two additional handles per characteristic.
+        // HACK: This will expand to 3 in the future to support
+        //       client characteristic configuration parameters
+        //       (requiring an additional handle)
+        length += handle_size * (*(dev_cfg->svc_tab + index)).chr_tab_len;
+    }
+
+    return length;
+}
+
+/**
+ * @brief       Determine offset of handle-space that includes attributes.
+ */
+static uint16_t handle_buffer_offset(uint16_t *handle_buffer) {
+    return handle_buffer[0];
+}
 
 // -------------------------------------------------------------
 // Attribute Table Management
@@ -67,11 +99,11 @@ INCLUDE_SERVICE_TYPE_UUID = 0x2802;
 // ---------------------------------
 
 // The size of a characteristics declaration data is one byte
-static const uint8_t CHR_DECL_SIZE = sizeof(uint8_t);
+static uint8_t CHR_DECL_SIZE = sizeof(uint8_t);
 
 // Read/Write Property Flag
-static const uint8_t CHR_PROP_READ_WRITE_FLAG =
-    ESP_GATT_CHAR_PROP_BIT_WRITE | ESP_GATT_CHAR_PROP_BIT_READ;
+static uint8_t CHR_PROP_FLAGS =
+    ESP_GATT_CHAR_PROP_BIT_WRITE_NR | ESP_GATT_CHAR_PROP_BIT_READ;
 
 // ---------------------------------
 // Initialization
@@ -84,56 +116,52 @@ vib_ble_gatt_table_init(const vib_ble_cfg_dev_t *dev_cfg) {
     // Initialization
     // ---------------------------------
 
+    ESP_LOGI(TAG, "Initializing Table");
+
     vib_ble_gatt_table_t *attr_tab = malloc(sizeof(vib_ble_gatt_table_t));
 
+    // Attribute Table Index (moved by the loop control)
+    uint8_t attr_idx = 0;
+
     // Capture the length of the table
-    attr_tab->len = vib_ble_cfg_handle_range(dev_cfg);
+    attr_tab->len = handle_buffer_range(dev_cfg);
 
     // Generic Attributes Table
     // TODO: Error Check
     attr_tab->data = malloc(attr_tab->len * sizeof(esp_gatts_attr_db_t));
 
-    // Attribute Table Index (moved by the loop control)
-    uint8_t attr_idx = 0;
-
-    uint8_t flags = dev_cfg->flags;
-
     // Service Table
-    vib_ble_cfg_svc_t *svc_tab = dev_cfg->svc_tab;
+    const vib_ble_cfg_svc_t *svc_tab = dev_cfg->svc_tab;
     // Number of Services in the Service Table
-    uint8_t svc_len = dev_cfg->svc_tab_len;
+    const uint8_t svc_len = dev_cfg->svc_tab_len;
 
     // ---------------------------------
     // For Each Service
     // ---------------------------------
     // TODO Error Checks
-    for (uint8_t svc_idx = 0; svc_idx <= svc_len; svc_idx++) {
+    for (uint8_t svc_idx = 0; svc_idx < svc_len; svc_idx++) {
 
         // ---------------------------------
         // Prepare the Values
         // ---------------------------------
 
         // Current Service Config
-        vib_ble_cfg_svc_t *svc_cfg = svc_tab + svc_idx;
+        const vib_ble_cfg_svc_t *svc_cfg = svc_tab + svc_idx;
 
         // Characteristics Table
-        vib_ble_cfg_chr_t *chr_tab = svc_cfg->chr_tab;
+        const vib_ble_cfg_chr_t *chr_tab = svc_cfg->chr_tab;
 
         // Number of Characteristic Table Elements
-        uint8_t chr_len = svc_cfg->chr_tab_len;
+        const uint8_t chr_len = svc_cfg->chr_tab_len;
 
         // Service ID
-        uint8_t *svc_id = svc_cfg->uuid128;
-
-        if (flags & VIB_BLE_CFG_AUTO_ID_FLAG) {
-            memcpy(svc_id, (uint8_t[])VIB_BLE_UUID_128(svc_idx, 0), 16);
-        } else if (flags & VIB_BLE_CFG_8BIT_ID_FLAG) {
-            memcpy(svc_id, (uint8_t[])VIB_BLE_UUID_128(svc_cfg->uuid8, 0), 16);
-        }
+        const uint8_t *svc_id = svc_cfg->uuid;
 
         // ---------------------------------
         // Construct the Service Attribute
         // ---------------------------------
+
+        ESP_LOGI(TAG, "Preparing Service Attribute (%d)", svc_idx);
 
         *(attr_tab->data + attr_idx++) = (esp_gatts_attr_db_t){
             .attr_control = {.auto_rsp = ESP_GATT_AUTO_RSP},
@@ -151,33 +179,28 @@ vib_ble_gatt_table_init(const vib_ble_cfg_dev_t *dev_cfg) {
                 // The value field contains the actual service UUID.
                 .max_length = ESP_UUID_LEN_128,
                 .length     = ESP_UUID_LEN_128,
-                .value      = svc_id,
+                .value      = (uint8_t *)svc_id,
             },
         };
 
         // ----------------------------------------------
         // For Each Characteristic in the current Service
         // ----------------------------------------------
-        for (uint8_t chr_idx = 0; chr_idx <= chr_len; chr_idx++) {
+        for (uint8_t chr_idx = 0; chr_idx < chr_len; chr_idx++) {
 
-            vib_ble_cfg_chr_t *chr_cfg = (chr_tab + chr_idx);
+            const vib_ble_cfg_chr_t *chr_cfg = (chr_tab + chr_idx);
 
-            uint8_t *chr_id = chr_cfg->uuid128;
+            const uint8_t *chr_id = chr_cfg->uuid;
 
-            if (flags & VIB_BLE_CFG_AUTO_ID_FLAG) {
-                memcpy(svc_id, (uint8_t[])VIB_BLE_UUID_128(chr_idx, 0), 16);
-            } else if (flags & VIB_BLE_CFG_8BIT_ID_FLAG) {
-                memcpy(
-                    svc_id,
-                    (uint8_t[])VIB_BLE_UUID_128(svc_cfg->uuid8, chr_cfg->uuid8),
-                    16);
-            }
+            ESP_LOGI(TAG, "Preparing Characteristic Attribute (%d/%d)", svc_idx,
+                     chr_idx);
 
             // ---------------------------------
             // Construct Declaration Attribute
             // ---------------------------------
+
             *(attr_tab->data + attr_idx++) = (esp_gatts_attr_db_t){
-                .attr_control = {.auto_rsp = ESP_GATT_AUTO_RSP},
+                .attr_control = {.auto_rsp = 0},
                 .att_desc =
                     // For Characteristic Declarations:
                 {
@@ -191,22 +214,23 @@ vib_ble_gatt_table_init(const vib_ble_cfg_dev_t *dev_cfg) {
                     .max_length = CHR_DECL_SIZE,
                     .length     = CHR_DECL_SIZE,
                     // FIXME: Support parameterized config
-                    .value = (uint8_t *)&CHR_PROP_READ_WRITE_FLAG,
+                    .value = &CHR_PROP_FLAGS,
                 },
             };
 
             // ---------------------------------
             // Construct Value Attribute
             // ---------------------------------
+
             *(attr_tab->data + attr_idx++) = (esp_gatts_attr_db_t){
-                .attr_control = {.auto_rsp = ESP_GATT_AUTO_RSP},
+                .attr_control = {.auto_rsp = 0},
                 .att_desc =
                     // For Characteristic Values:
                 {
                     // The UUID fields directly relate to the real UUID of the
                     // attribute.
                     .uuid_length = ESP_UUID_LEN_128,
-                    .uuid_p      = chr_id,
+                    .uuid_p      = (uint8_t *)chr_id,
                     // Permissions should match declaration properties.
                     // FIXME: Support parameterized config
                     .perm = ESP_GATT_PERM_READ | ESP_GATT_PERM_WRITE,

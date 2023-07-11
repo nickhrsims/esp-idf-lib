@@ -55,31 +55,19 @@
 #define VIB_BLE_UUID_128_GET_CHR_INDEX(uuid128) uuid128[10]
 
 // -------------------------------------------------------------
-// Configuration Flags
-// -------------------------------------------------------------
-
-/// If set on device config, will generate UUIDs using configurations placement
-/// index.
-static const uint8_t VIB_BLE_CFG_AUTO_ID_FLAG = (1 << 0);
-
-/// If set on device config, will use provided 8-bit UUID to generate 128-bit
-/// UUID.
-static const uint8_t VIB_BLE_CFG_8BIT_ID_FLAG = (1 << 1);
-
-// -------------------------------------------------------------
-// Client-Oriented Transparent Structures
+// Device Configuration Structures
 // -------------------------------------------------------------
 
 /**
  * @brief       Characteristic configuration structure with control-callbacks.
  */
 typedef struct {
-    void (*on_read)(void *);  ///< Called on characteristic read request.
-    void (*on_write)(void *); ///< Called on characteristic write request.
+    void (*on_read)(uint8_t *data);               ///< Read callback
+    void (*on_write)(uint8_t *val, uint16_t len); ///< Write callback
 
-    uint8_t uuid8;                     ///< 8-bit Characteristic ID.
-    uint8_t uuid128[ESP_UUID_LEN_128]; ///< 128-bit Characteristic ID.
-                                       ///< Generated from 8-bit ID if provided.
+    uint16_t size; ///< Data size for read/write operations.
+
+    uint8_t uuid[ESP_UUID_LEN_128]; ///< 128-bit Characteristic ID.
 
 } vib_ble_cfg_chr_t;
 
@@ -91,9 +79,7 @@ typedef struct {
     vib_ble_cfg_chr_t
         *chr_tab; ///< Array of characteristic control-callback containers.
 
-    uint8_t uuid8;                     ///< 8-bit Service ID.
-    uint8_t uuid128[ESP_UUID_LEN_128]; ///< 128-bit Service ID. Generated from
-                                       ///<     8-bit ID if provided.
+    uint8_t uuid[ESP_UUID_LEN_128]; ///< 128-bit Service ID.
 
 } vib_ble_cfg_svc_t;
 
@@ -115,38 +101,6 @@ typedef struct {
         *svc_tab; ///< Service table, array of service configuration containers.
     uint8_t svc_tab_len;
 
-    uint8_t flags; ///< Configuration Flags.
-
 } vib_ble_cfg_dev_t;
-
-// -------------------------------------------------------------
-// Auxiliary Procedures
-// -------------------------------------------------------------
-
-/**
- * @brief       Determine length of required handle buffer.
- */
-uint8_t vib_ble_cfg_handle_range(const vib_ble_cfg_dev_t *const dev_cfg);
-
-// -------------------------------------------------------------
-// Characteristic Handle-To-Configuration Map
-// -------------------------------------------------------------
-
-/**
- * @brief       Primitive handle-to-char_config mapping structure.
- *
- *              Used to relate handles on read/write requests to their
- *              appropriate configuration structure.
- */
-typedef struct vib_ble_cfg_chr_map_s vib_ble_cfg_chr_map_t;
-
-vib_ble_cfg_chr_map_t *
-vib_ble_cfg_chr_map_init(const vib_ble_cfg_dev_t *dev_cfg,
-                         uint16_t *handle_buffer, uint16_t handle_buffer_len);
-void vib_ble_cfg_chr_map_deinit(vib_ble_cfg_chr_map_t *map);
-void vib_ble_cfg_chr_map_set(vib_ble_cfg_chr_map_t *map, uint16_t handle,
-                             vib_ble_cfg_chr_t *value);
-vib_ble_cfg_chr_t *vib_ble_cfg_chr_map_get(vib_ble_cfg_chr_map_t *map,
-                                           uint16_t key);
 
 #endif // VIB_BLE_CFG_H_

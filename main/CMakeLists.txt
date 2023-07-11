@@ -7,6 +7,12 @@ set(COMPONENT_SRCS
   "vib_audio_params.c"
 
   "vib_memory.c"
+
+  "vib_ble_gap.c"
+  "vib_ble_gatt_server.c"
+  "vib_ble_gatt_table.c"
+  "vib_ble_util.c"
+
 )
 set(COMPONENT_ADD_INCLUDEDIRS .)
 

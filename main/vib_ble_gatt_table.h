@@ -9,16 +9,21 @@
 
 #include <stdint.h>
 
+#include "esp_gatt_defs.h"
+
 #include "vib_ble_cfg.h"
 
 // -------------------------------------------------------------
-// Opaque Domain Structures
+// Domain Structures
 // -------------------------------------------------------------
 
 /**
  * @brief       GATT Attribute Table. Used to configure a GATT server instance.
  */
-typedef struct vib_ble_gatt_table_s vib_ble_gatt_table_t;
+typedef struct vib_ble_gatt_table_s {
+    uint16_t len;
+    esp_gatts_attr_db_t *data;
+} vib_ble_gatt_table_t;
 
 // -------------------------------------------------------------
 // Procedures
