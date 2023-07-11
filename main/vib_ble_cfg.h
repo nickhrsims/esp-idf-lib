@@ -129,7 +129,7 @@ typedef struct {
 uint8_t vib_ble_cfg_handle_range(const vib_ble_cfg_dev_t *const dev_cfg);
 
 // -------------------------------------------------------------
-// Internal Opaque Structures
+// Characteristic Handle-To-Configuration Map
 // -------------------------------------------------------------
 
 /**
@@ -139,5 +139,14 @@ uint8_t vib_ble_cfg_handle_range(const vib_ble_cfg_dev_t *const dev_cfg);
  *              appropriate configuration structure.
  */
 typedef struct vib_ble_cfg_chr_map_s vib_ble_cfg_chr_map_t;
+
+vib_ble_cfg_chr_map_t *
+vib_ble_cfg_chr_map_init(const vib_ble_cfg_dev_t *dev_cfg,
+                         uint16_t *handle_buffer, uint16_t handle_buffer_len);
+void vib_ble_cfg_chr_map_deinit(vib_ble_cfg_chr_map_t *map);
+void vib_ble_cfg_chr_map_set(vib_ble_cfg_chr_map_t *map, uint16_t handle,
+                             vib_ble_cfg_chr_t *value);
+vib_ble_cfg_chr_t *vib_ble_cfg_chr_map_get(vib_ble_cfg_chr_map_t *map,
+                                           uint16_t key);
 
 #endif // VIB_BLE_CFG_H_
