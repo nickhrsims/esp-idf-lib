@@ -10,7 +10,7 @@
 #include "esp_bt_defs.h"
 
 // -------------------------------------------------------------
-// Freudensong Attribute Type UUIDs
+// Freudensong UUID System
 // -------------------------------------------------------------
 //
 // Base UUID Auxiliary Macro
@@ -26,10 +26,10 @@
 //     YY: CHARACTERISTIC   @ 10
 //
 // Parameters:
-//     (uint8_t)    service_index     - Ordered index of service.
+//     (uint8_t)    service_index     - Internal Service ID.
 //
-//     (uint8_t) characteristic_index - Ordered index of characteristic,
-//                                      use zero if service.
+//     (uint8_t) characteristic_index - Internal Characteristic ID.
+//                                NOTE: Must be `0` when declaring a service.
 //
 // Note:
 //     Parameters (atow) are not used for internal purposes, any range of
