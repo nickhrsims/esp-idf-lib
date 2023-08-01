@@ -24,9 +24,16 @@
 // -------------------------------------------------------------
 // Auxiliary
 // -------------------------------------------------------------
-#define BYTE0(object)      (char)object
-#define BYTE1(object)      (char)((int16_t)object >> 8)
-#define WORD(byte0, byte1) ((int16_t)(byte1 << 8) | byte0)
+// Combine bytes to word
+#define WORD(byte0, byte1) (((int16_t)(byte1 << 8) | byte0))
+// Low byte of word
+#define BYTE0(word) ((char)word)
+// High byte of word
+#define BYTE1(word) ((char)((int16_t)word >> 8))
+// Cast word to float
+#define FLOAT(word) ((float)word)
+// Cast float to word
+#define FWORD(float_) ((int16_t)float_)
 
 // -------------------------------------------------------------
 // Constants
