@@ -15,6 +15,7 @@
 
 #include "audio_element.h"
 #include "audio_error.h"
+#include "audio_type_def.h"
 #include "esp_log.h"
 #include <string.h>
 
@@ -56,6 +57,12 @@ static esp_err_t destroy(audio_element_handle_t self);
 static audio_element_err_t process(audio_element_handle_t self,
                                    audio_byte_t *input_buffer,
                                    audio_buffer_size_t input_buffer_size);
+
+// -------------------------------------------------------------
+// Static Data
+// -------------------------------------------------------------
+// Audio output buffer at default threshold for esp i2s stream reader.
+audio_byte_t output_buffer[ESP_AUDIO_SAMPLERATE_44K];
 
 // -------------------------------------------------------------
 // Initilize
@@ -142,20 +149,21 @@ static audio_element_err_t process(audio_element_handle_t self,
     //
     if (read_size > 0) {
 
-        for (char *spool = input_buffer;
-             spool != input_buffer + input_buffer_length; spool += 2) {
+        for (audio_buffer_size_t idx = 0; idx < input_buffer_length; idx += 2) {
 
+            // Read from input
             audio_sample_t sample =
-                WORD(*spool, *(spool + 1)) * vib_audio_param_gain;
+                WORD(*(input_buffer + idx), *(input_buffer + idx + 1)) *
+                vib_audio_param_gain;
 
-            *spool       = BYTE0(sample);
-            *(spool + 1) = BYTE1(sample);
+            // Write to output
+            *(output_buffer + idx)     = BYTE0(sample);
+            *(output_buffer + idx + 1) = BYTE1(sample);
         }
 
-        write_size = audio_element_output(self, input_buffer, read_size);
+        write_size = audio_element_output(self, output_buffer, read_size);
     } else {
         ESP_LOGW(TAG, "Read Size is %d", read_size);
-        write_size = read_size;
     }
 
     return write_size;
