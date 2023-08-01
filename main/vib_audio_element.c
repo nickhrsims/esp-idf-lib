@@ -44,7 +44,8 @@ static const char *TAG = "VIB";
 // Types
 // -------------------------------------------------------------
 typedef int16_t audio_sample_t;
-typedef int8_t audio_sample_byte_t;
+typedef char audio_byte_t;
+typedef int audio_buffer_size_t;
 
 // -------------------------------------------------------------
 // Forward Declarations
@@ -53,7 +54,8 @@ static esp_err_t open(audio_element_handle_t self);
 static esp_err_t close(audio_element_handle_t self);
 static esp_err_t destroy(audio_element_handle_t self);
 static audio_element_err_t process(audio_element_handle_t self,
-                                   char *input_buffer, int input_buffer_size);
+                                   audio_byte_t *input_buffer,
+                                   audio_buffer_size_t input_buffer_size);
 
 // -------------------------------------------------------------
 // Initilize
@@ -116,8 +118,8 @@ vib_audio_element_init(vib_audio_element_cfg_t *vib_audio_element_cfg) {
 
 /// Audio Process Callback
 static audio_element_err_t process(audio_element_handle_t self,
-                                   char *input_buffer,
-                                   int input_buffer_length) {
+                                   audio_byte_t *input_buffer,
+                                   audio_buffer_size_t input_buffer_length) {
     //
     // Get input buffer + size
     //
