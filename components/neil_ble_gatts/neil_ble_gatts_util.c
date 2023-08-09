@@ -1,8 +1,8 @@
 #include "esp_log.h"
 
-#include "vib_ble_util.h"
+#include "neil_ble_gatts_util.h"
 
-char *vib_ble_util_esp_key_to_str(esp_ble_key_type_t key_type) {
+char *neil_ble_gatts_util_esp_key_to_str(esp_ble_key_type_t key_type) {
     char *key_str = NULL;
     switch (key_type) {
     case ESP_LE_KEY_NONE:
@@ -40,7 +40,7 @@ char *vib_ble_util_esp_key_to_str(esp_ble_key_type_t key_type) {
     return key_str;
 }
 
-char *vib_ble_util_esp_auth_req_to_str(esp_ble_auth_req_t auth_req) {
+char *neil_ble_gatts_util_esp_auth_req_to_str(esp_ble_auth_req_t auth_req) {
     char *auth_str = NULL;
     switch (auth_req) {
     case ESP_LE_AUTH_NO_BOND:
@@ -75,7 +75,7 @@ char *vib_ble_util_esp_auth_req_to_str(esp_ble_auth_req_t auth_req) {
     return auth_str;
 }
 
-void vib_ble_util_show_bonded_devices(const char *const tag) {
+void neil_ble_gatts_util_show_bonded_devices(const char *const tag) {
     int dev_num = esp_ble_get_bond_device_num();
 
     esp_ble_bond_dev_t *dev_list =

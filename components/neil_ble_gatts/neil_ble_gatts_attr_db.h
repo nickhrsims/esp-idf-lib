@@ -1,17 +1,17 @@
-/// vib_ble_gatt_table.h
+/// neil_ble_gatts_attr_db.h
 ///
 /// @author     Nicholas H.R. Sims
 ///
 /// @brief      GATT Attribute Table API Spec.
 
-#ifndef VIB_BLE_GATT_TABLE_H_
-#define VIB_BLE_GATT_TABLE_H_
+#ifndef neil_ble_gatts_attr_db_H_
+#define neil_ble_gatts_attr_db_H_
 
 #include <stdint.h>
 
 #include "esp_gatt_defs.h"
 
-#include "vib_ble_cfg.h"
+#include "neil_ble_gatts_cfg.h"
 
 // -------------------------------------------------------------
 // Domain Structures
@@ -20,10 +20,10 @@
 /**
  * @brief       GATT Attribute Table. Used to configure a GATT server instance.
  */
-typedef struct vib_ble_gatt_table_s {
+typedef struct neil_ble_gatts_attr_db_s {
     uint16_t len;
     esp_gatts_attr_db_t *data;
-} vib_ble_gatt_table_t;
+} neil_ble_gatts_attr_db_t;
 
 // -------------------------------------------------------------
 // Procedures
@@ -32,7 +32,7 @@ typedef struct vib_ble_gatt_table_s {
 /**
  * @brief       Create a new GATT attribute table.
  */
-vib_ble_gatt_table_t *vib_ble_gatt_table_init(const vib_ble_cfg_dev_t *dev_cfg);
+neil_ble_gatts_attr_db_t *neil_ble_gatts_attr_db_init(const neil_ble_gatts_cfg_dev_t *dev_cfg);
 
 /**
  * @brief       Tear down contents of a GATT Attribute Table.
@@ -40,6 +40,6 @@ vib_ble_gatt_table_t *vib_ble_gatt_table_init(const vib_ble_cfg_dev_t *dev_cfg);
  * Warning: destructive process, do not use the input structure
  *          after tear down process without re-initializing.
  */
-void vib_ble_gatt_table_deinit(vib_ble_gatt_table_t *attr_tab);
+void neil_ble_gatts_attr_db_deinit(neil_ble_gatts_attr_db_t *attr_tab);
 
-#endif // VIB_BLE_GATT_TABLE_H_
+#endif // neil_ble_gatts_attr_db_H_

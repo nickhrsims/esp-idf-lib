@@ -1,11 +1,11 @@
-/// vib_ble_cfg.h
+/// neil_ble_gatts_cfg.h
 ///
 /// @author     Nicholas H.R. Sims
 ///
 /// @brief      Bluetooth Low-Energy Domain API.
 
-#ifndef VIB_BLE_CFG_H_
-#define VIB_BLE_CFG_H_
+#ifndef neil_ble_gatts_CFG_H_
+#define neil_ble_gatts_CFG_H_
 
 #include "esp_bt_defs.h"
 
@@ -39,20 +39,20 @@
 //     i.e. 0000NNNN-0000-1000-8000-00805F9B34FB
 //
 // Usage:
-//     VIB_BLE_UUID_128(service_index, characteristic_index)
+//     neil_ble_gatts_UUID_128(service_index, characteristic_index)
 //
 // @see https://www.uuidgenerator.net/
-#define VIB_BLE_UUID_128(XX, YY)                                               \
+#define neil_ble_gatts_UUID_128(XX, YY)                                               \
     {                                                                          \
         0xD7, 0x36, 0x7A, 0x53, 0x0C, 0x0A, 0xD1, 0x84, 0x2E, 0x45, YY, XX,    \
             0xD6, 0xB9, 0xD5, 0xC2                                             \
     }
 
 /// Get service index (by-convention) from UUID.
-#define VIB_BLE_UUID_128_GET_SVC_INDEX(uuid128) uuid128[11]
+#define neil_ble_gatts_UUID_128_GET_SVC_INDEX(uuid128) uuid128[11]
 
 /// Get characteristic index (by-convention) from UUID.
-#define VIB_BLE_UUID_128_GET_CHR_INDEX(uuid128) uuid128[10]
+#define neil_ble_gatts_UUID_128_GET_CHR_INDEX(uuid128) uuid128[10]
 
 // -------------------------------------------------------------
 // Device Configuration Structures
@@ -69,19 +69,19 @@ typedef struct {
 
     uint8_t uuid[ESP_UUID_LEN_128]; ///< 128-bit Characteristic ID.
 
-} vib_ble_cfg_chr_t;
+} neil_ble_gatts_cfg_chr_t;
 
 /**
  * @brief       Service configuration structure.
  */
 typedef struct {
     uint8_t chr_tab_len; ///< Number of characteristics
-    vib_ble_cfg_chr_t
+    neil_ble_gatts_cfg_chr_t
         *chr_tab; ///< Array of characteristic control-callback containers.
 
     uint8_t uuid[ESP_UUID_LEN_128]; ///< 128-bit Service ID.
 
-} vib_ble_cfg_svc_t;
+} neil_ble_gatts_cfg_svc_t;
 
 /**
  * @brief       Device configuration structure.
@@ -97,10 +97,10 @@ typedef struct {
     char *mfr;       ///< Manufacturer name.
     uint8_t mfr_len; ///< Length of the manufacturer name.
 
-    vib_ble_cfg_svc_t
+    neil_ble_gatts_cfg_svc_t
         *svc_tab; ///< Service table, array of service configuration containers.
     uint8_t svc_tab_len;
 
-} vib_ble_cfg_dev_t;
+} neil_ble_gatts_cfg_dev_t;
 
-#endif // VIB_BLE_CFG_H_
+#endif // neil_ble_gatts_CFG_H_

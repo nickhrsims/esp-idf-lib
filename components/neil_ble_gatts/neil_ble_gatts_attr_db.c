@@ -1,4 +1,4 @@
-/// vib_ble_gatt_table.c
+/// neil_ble_gatts_attr_db.c
 ///
 /// @author     Nicholas H.R. Sims
 ///
@@ -11,10 +11,10 @@
 #include "esp_gatt_defs.h"
 
 #include "esp_log.h"
-#include "vib_ble_cfg.h"
-#include "vib_ble_gatt_table.h"
+#include "neil_ble_gatts_cfg.h"
+#include "neil_ble_gatts_attr_db.h"
 
-static const char *TAG = "VIB_BLE_GATT_TABLE";
+static const char *TAG = "neil_ble_gatts_attr_db";
 
 // -------------------------------------------------------------
 // Attribute Handle Utilities
@@ -28,7 +28,7 @@ static const char *TAG = "VIB_BLE_GATT_TABLE";
  *              and can be used to determine how many 2-byte memory cells are
  *              needed to create a handle-to-configuration-entry map.
  */
-static uint8_t handle_buffer_range(const vib_ble_cfg_dev_t *const dev_cfg) {
+static uint8_t handle_buffer_range(const neil_ble_gatts_cfg_dev_t *const dev_cfg) {
 
     // --- 2-byte wide handles (uint16_t)
     static const uint8_t handle_size = 2;
@@ -109,8 +109,8 @@ static uint8_t CHR_PROP_FLAGS =
 // Initialization
 // ---------------------------------
 
-vib_ble_gatt_table_t *
-vib_ble_gatt_table_init(const vib_ble_cfg_dev_t *dev_cfg) {
+neil_ble_gatts_attr_db_t *
+neil_ble_gatts_attr_db_init(const neil_ble_gatts_cfg_dev_t *dev_cfg) {
 
     // ---------------------------------
     // Initialization
@@ -118,7 +118,7 @@ vib_ble_gatt_table_init(const vib_ble_cfg_dev_t *dev_cfg) {
 
     ESP_LOGI(TAG, "Initializing Table");
 
-    vib_ble_gatt_table_t *attr_tab = malloc(sizeof(vib_ble_gatt_table_t));
+    neil_ble_gatts_attr_db_t *attr_tab = malloc(sizeof(neil_ble_gatts_attr_db_t));
 
     // Attribute Table Index (moved by the loop control)
     uint8_t attr_idx = 0;
@@ -131,7 +131,7 @@ vib_ble_gatt_table_init(const vib_ble_cfg_dev_t *dev_cfg) {
     attr_tab->data = malloc(attr_tab->len * sizeof(esp_gatts_attr_db_t));
 
     // Service Table
-    const vib_ble_cfg_svc_t *svc_tab = dev_cfg->svc_tab;
+    const neil_ble_gatts_cfg_svc_t *svc_tab = dev_cfg->svc_tab;
     // Number of Services in the Service Table
     const uint8_t svc_len = dev_cfg->svc_tab_len;
 
@@ -146,10 +146,10 @@ vib_ble_gatt_table_init(const vib_ble_cfg_dev_t *dev_cfg) {
         // ---------------------------------
 
         // Current Service Config
-        const vib_ble_cfg_svc_t *svc_cfg = svc_tab + svc_idx;
+        const neil_ble_gatts_cfg_svc_t *svc_cfg = svc_tab + svc_idx;
 
         // Characteristics Table
-        const vib_ble_cfg_chr_t *chr_tab = svc_cfg->chr_tab;
+        const neil_ble_gatts_cfg_chr_t *chr_tab = svc_cfg->chr_tab;
 
         // Number of Characteristic Table Elements
         const uint8_t chr_len = svc_cfg->chr_tab_len;
@@ -188,7 +188,7 @@ vib_ble_gatt_table_init(const vib_ble_cfg_dev_t *dev_cfg) {
         // ----------------------------------------------
         for (uint8_t chr_idx = 0; chr_idx < chr_len; chr_idx++) {
 
-            const vib_ble_cfg_chr_t *chr_cfg = (chr_tab + chr_idx);
+            const neil_ble_gatts_cfg_chr_t *chr_cfg = (chr_tab + chr_idx);
 
             const uint8_t *chr_id = chr_cfg->uuid;
 
@@ -250,7 +250,7 @@ vib_ble_gatt_table_init(const vib_ble_cfg_dev_t *dev_cfg) {
 // Termination
 // ---------------------------------
 
-void vib_ble_gatt_table_deinit(vib_ble_gatt_table_t *attr_tab) {
+void neil_ble_gatts_attr_db_deinit(neil_ble_gatts_attr_db_t *attr_tab) {
     free(attr_tab->data);
     attr_tab->len = 0;
     free(attr_tab);

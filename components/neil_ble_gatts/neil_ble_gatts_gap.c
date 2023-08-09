@@ -4,11 +4,11 @@
 #include "esp_gap_ble_api.h"
 #include "esp_log.h"
 
-#include "vib_ble_cfg.h"
-#include "vib_ble_gap.h"
-#include "vib_ble_util.h"
+#include "neil_ble_gatts_cfg.h"
+#include "neil_ble_gatts_gap.h"
+#include "neil_ble_gatts_util.h"
 
-static const char *const TAG = "VIB_BLE_GAP";
+static const char *const TAG = "neil_ble_gatts_GAP";
 
 static struct gap_config_s {
     esp_ble_adv_data_t adv_data;
@@ -21,7 +21,7 @@ static struct gap_config_s {
 // -------------------------------------------------------------
 
 // --- Advertising
-static void adv_svc_uuid_merge(const vib_ble_cfg_dev_t *dev_cfg, uint8_t *uuid);
+static void adv_svc_uuid_merge(const neil_ble_gatts_cfg_dev_t *dev_cfg, uint8_t *uuid);
 
 // -------------------------------------------------------------
 // Advertising State Control Flags
@@ -33,7 +33,7 @@ static const uint8_t SCAN_RSP_CONFIG_COMPLETED_FLAG = 0b10;
 // --- Condition byte used to track status flags
 static uint8_t is_adv_config_done = 0;
 
-void vib_ble_gap_init(const vib_ble_cfg_dev_t *dev_cfg) {
+void neil_ble_gatts_gap_init(const neil_ble_gatts_cfg_dev_t *dev_cfg) {
 
     // FIXME: Increase size to maximum length
     static uint8_t adv_svc_uuid[16];
@@ -45,7 +45,7 @@ void vib_ble_gap_init(const vib_ble_cfg_dev_t *dev_cfg) {
     for (uint8_t svc_idx = 0; svc_idx < dev_cfg->svc_tab_len; svc_idx++) {
         uint16_t offset = ESP_UUID_LEN_128 * svc_idx;
         // Create a UUID to relate to the service
-        memcpy(&adv_svc_uuid[offset], (uint8_t[])VIB_BLE_UUID_128(svc_idx, 0),
+        memcpy(&adv_svc_uuid[offset], (uint8_t[])neil_ble_gatts_UUID_128(svc_idx, 0),
                ESP_UUID_LEN_128);
     }
 
@@ -89,7 +89,7 @@ void vib_ble_gap_init(const vib_ble_cfg_dev_t *dev_cfg) {
     };
 }
 
-void vib_ble_gap_advertise() {
+void neil_ble_gatts_gap_advertise() {
     esp_ble_gap_start_advertising(&gap_config.adv_params);
 }
 
@@ -99,7 +99,7 @@ void vib_ble_gap_advertise() {
  *              Responds to BLE GAP Events that occur during advertising and
  *              response procedures.
  */
-void vib_ble_gap_event_handler(esp_gap_ble_cb_event_t event,
+void neil_ble_gatts_gap_event_handler(esp_gap_ble_cb_event_t event,
                                esp_ble_gap_cb_param_t *param) {
 
     ESP_LOGV(TAG, "GAP_EVT, event %d\n", event);
@@ -110,7 +110,7 @@ void vib_ble_gap_event_handler(esp_gap_ble_cb_event_t event,
     case ESP_GAP_BLE_ADV_DATA_SET_COMPLETE_EVT:
         is_adv_config_done &= (~ADV_CONFIG_COMPLETED_FLAG);
         if (is_adv_config_done == 0) {
-            vib_ble_gap_advertise();
+            neil_ble_gatts_gap_advertise();
         }
         break;
 
@@ -118,7 +118,7 @@ void vib_ble_gap_event_handler(esp_gap_ble_cb_event_t event,
     case ESP_GAP_BLE_SCAN_RSP_DATA_SET_COMPLETE_EVT:
         is_adv_config_done &= (~SCAN_RSP_CONFIG_COMPLETED_FLAG);
         if (is_adv_config_done == 0) {
-            vib_ble_gap_advertise();
+            neil_ble_gatts_gap_advertise();
         }
         break;
 
@@ -140,7 +140,7 @@ void vib_ble_gap_event_handler(esp_gap_ble_cb_event_t event,
     //       For this reason, the passkey reply system is unused.
     case ESP_GAP_BLE_PASSKEY_REQ_EVT: /* passkey request event */
         ESP_LOGI(TAG, "ESP_GAP_BLE_PASSKEY_REQ_EVT");
-        // esp_ble_passkey_reply(&profile_table[PROFILE_APP_ID].remote_bda,
+        // esp_ble_passkey_reply(&profile_table[PROFILE_neil_ID].remote_bda,
         // true,
         //                       0x00);
         break;
@@ -201,7 +201,7 @@ void vib_ble_gap_event_handler(esp_gap_ble_cb_event_t event,
         // shows the ble key info share with peer device to the user.
         ESP_LOGI(
             TAG, "key type = %s",
-            vib_ble_util_esp_key_to_str(param->ble_security.ble_key.key_type));
+            neil_ble_gatts_util_esp_key_to_str(param->ble_security.ble_key.key_type));
         break;
 
     // --- On Authentication Done
@@ -222,10 +222,10 @@ void vib_ble_gap_event_handler(esp_gap_ble_cb_event_t event,
                      param->ble_security.auth_cmpl.fail_reason);
         } else {
             ESP_LOGI(TAG, "auth mode = %s",
-                     vib_ble_util_esp_auth_req_to_str(
+                     neil_ble_gatts_util_esp_auth_req_to_str(
                          param->ble_security.auth_cmpl.auth_mode));
         }
-        vib_ble_util_show_bonded_devices(TAG);
+        neil_ble_gatts_util_show_bonded_devices(TAG);
         break;
     }
 
@@ -275,7 +275,7 @@ void vib_ble_gap_event_handler(esp_gap_ble_cb_event_t event,
 //
 // In it's current state, it is 1:1 with the GATT security example
 //
-void vib_ble_gap_configure_security() {
+void neil_ble_gatts_gap_configure_security() {
     /* set the security iocap & auth_req & key size & init key response key
      * parameters to the stack*/
 
@@ -326,7 +326,7 @@ void vib_ble_gap_configure_security() {
                                    sizeof(uint8_t));
 }
 
-static void adv_svc_uuid_merge(const vib_ble_cfg_dev_t *dev_cfg,
+static void adv_svc_uuid_merge(const neil_ble_gatts_cfg_dev_t *dev_cfg,
                                uint8_t *uuid) {
 
     ESP_LOGI(TAG, "Merging Service UUIDs for advertising");
