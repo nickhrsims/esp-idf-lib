@@ -20,4 +20,6 @@ BraceWrapping:
   SplitEmptyFunction: false
 
 BracedInitializerIndentWidth: 4
+
+ColumnLimit: 88
 ...

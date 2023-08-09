@@ -9,6 +9,11 @@
 // Prototypes
 // -------------------------------------------------------------
 
+/**
+ * @brief       Start a new Bluetooth Low-Energy GATT Server.
+ *
+ *              (Do not start more than one server)
+ */
 void neil_ble_gatts_start(const neil_ble_gatts_cfg_dev_t *dev_cfg);
 
 #endif // neil_ble_gatts_H_
