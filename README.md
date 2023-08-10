@@ -11,3 +11,4 @@ Built with :heart: using the [Espressif ESP32 Audio Development Framework](https
 # License
 
 Significant portions of the components and examples are taken from Espressif's components/examples. See citations at the top of select files for case-by-case modifications of Espressif authored source.
+ 
