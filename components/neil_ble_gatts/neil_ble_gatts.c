@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Nicholas H.R. Sims <nickhrsims@gmail.com>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include <stdint.h>
 #include <string.h>
 
@@ -69,9 +73,6 @@ void neil_ble_gatts_start(const neil_ble_gatts_cfg_dev_t *dev_cfg) {
     // --- Prepare Device Configuration
     device_config_set(dev_cfg);
 
-    // --- Return Code for repeat checks
-    esp_err_t ret;
-
     // ---------------------------------
     // Memory Release
     // ---------------------------------
@@ -87,63 +88,34 @@ void neil_ble_gatts_start(const neil_ble_gatts_cfg_dev_t *dev_cfg) {
     esp_bt_controller_config_t bt_cfg = BT_CONTROLLER_INIT_CONFIG_DEFAULT();
 
     // --- Initialize BT Controller
-    ret = esp_bt_controller_init(&bt_cfg);
-    if (ret) {
-        ESP_LOGE(TAG, "%s init controller failed: %s", __func__, esp_err_to_name(ret));
-        return;
-    }
+    esp_bt_controller_init(&bt_cfg);
 
     // --- Enable BT Controller
-    ret = esp_bt_controller_enable(ESP_BT_MODE_BLE);
-    if (ret) {
-        ESP_LOGE(TAG, "%s enable controller failed: %s", __func__,
-                 esp_err_to_name(ret));
-        return;
-    }
+    esp_bt_controller_enable(ESP_BT_MODE_BLE);
 
     // ---------------------------------
     // Bluedroid Stack
     // ---------------------------------
 
     // --- Initialize Bluedroid Stack
-    ESP_LOGI(TAG, "%s init bluetooth", __func__);
-    ret = esp_bluedroid_init();
-    if (ret) {
-        ESP_LOGE(TAG, "%s init bluetooth failed: %s", __func__, esp_err_to_name(ret));
-        return;
-    }
+    esp_bluedroid_init();
 
     // --- Enable Bluedroid Stack
-    ret = esp_bluedroid_enable();
-    if (ret) {
-        ESP_LOGE(TAG, "%s enable bluetooth failed: %s", __func__, esp_err_to_name(ret));
-        return;
-    }
+    esp_bluedroid_enable();
 
     // ---------------------------------
     // Callback Registration
     // ---------------------------------
 
-    ret = esp_ble_gatts_register_callback(gatts_event_callback);
-    if (ret) {
-        ESP_LOGE(TAG, "gatts register error, error code = %x", ret);
-        return;
-    }
-    ret = esp_ble_gap_register_callback(neil_ble_gatts_gap_event_handler);
-    if (ret) {
-        ESP_LOGE(TAG, "gap register error, error code = %x", ret);
-        return;
-    }
+    esp_ble_gatts_register_callback(gatts_event_callback);
+
+    esp_ble_gap_register_callback(neil_ble_gatts_gap_event_handler);
 
     // ---------------------------------
     // Application Profile Registration
     // ---------------------------------
 
-    ret = esp_ble_gatts_app_register(PROFILE_ID);
-    if (ret) {
-        ESP_LOGE(TAG, "gatts app register error, error code = %x", ret);
-        return;
-    }
+    esp_ble_gatts_app_register(PROFILE_ID);
 
     // ---------------------------------
     // Configure GAP Security Parameters
@@ -266,8 +238,6 @@ static void gatts_event_callback(esp_gatts_cb_event_t event, esp_gatt_if_t gatts
     case ESP_GATTS_REG_EVT:
 
         // --- Prepare GAP
-        // FIXME: Violates abstraction level, move name into gap init!
-        esp_ble_gap_set_device_name(device_config->name);
         neil_ble_gatts_gap_init(device_config);
 
         // --- Configure Privacy Settings
@@ -332,14 +302,16 @@ static void gatts_event_callback(esp_gatts_cb_event_t event, esp_gatt_if_t gatts
         // --- On Read Operation Request
         //
     case ESP_GATTS_READ_EVT: {
-        ESP_LOGI(TAG, "Read: Handle(%x)", param->read.handle);
+
         // Acquire characteristic config object
         neil_ble_gatts_cfg_chr_t *chr_cfg =
             chr_handle_map_get(handle_map, param->read.handle);
 
         // Prepare response object
         esp_gatt_rsp_t rsp;
+
         memset(&rsp, 0, sizeof(esp_gatt_rsp_t));
+
         rsp.attr_value.handle = param->read.handle;
         rsp.attr_value.len    = chr_cfg->size;
 
@@ -352,20 +324,17 @@ static void gatts_event_callback(esp_gatts_cb_event_t event, esp_gatt_if_t gatts
         break;
     }
 
-        // ---------------------------------
-        // Data Write Events
-        // ---------------------------------
+    // ---------------------------------
+    // Data Write Events
+    // ---------------------------------
 
-        //
-        // --- On Write Operation Request
-        //
+    //
+    // --- On Write Operation Request
+    //
     case ESP_GATTS_WRITE_EVT: {
-        ESP_LOGI(TAG, "ESP_GATTS_WRITE_EVT, write value:");
         esp_log_buffer_hex(TAG, param->write.value, param->write.len);
-
         chr_handle_map_get(handle_map, param->write.handle)
             ->on_write(param->write.value, param->write.len);
-
         break;
     }
 
@@ -383,95 +352,12 @@ static void gatts_event_callback(esp_gatts_cb_event_t event, esp_gatt_if_t gatts
 
     // --- On Client Connection
     case ESP_GATTS_CONNECT_EVT:
-        ESP_LOGI(TAG, "ESP_GATTS_CONNECT_EVT");
-        /* start security connect with peer device when receive the connect
-         * event sent by the master */
         esp_ble_set_encryption(param->connect.remote_bda, ESP_BLE_SEC_ENCRYPT_MITM);
         break;
 
     // --- On Client Disconnection
     case ESP_GATTS_DISCONNECT_EVT:
-        ESP_LOGI(TAG, "ESP_GATTS_DISCONNECT_EVT, disconnect reason 0x%x",
-                 param->disconnect.reason);
-        /* start advertising again when missing the connect */
         neil_ble_gatts_gap_advertise();
-        break;
-
-    // --- On Connection Listener Started
-    case ESP_GATTS_LISTEN_EVT:
-        break;
-
-    //
-    // --- On Write Operation Confirmation Request
-    //
-    // NOTE: Assumed write operation relationships
-    //
-    //       This does not appear to be necessary in the current model,
-    //       as the pdu size is small enough for each characteristic.
-    //
-    // [client]         [server]
-    //    |    ------->    |
-    //    |  request write |
-    //    |                |
-    //    |   <-------     |
-    //    | respond ok/err |
-    //    |                |
-    //    |   if got ok    |
-    //    |    ------->    |
-    //    |  request exec  |
-    //    |                |
-    //    |            --- |
-    //    | do write  |    |
-    //    |            --> |
-    case ESP_GATTS_EXEC_WRITE_EVT:
-        break;
-
-    // ---------------------------------
-    // Service Events
-    // ---------------------------------
-
-    // --- On Service Deleted
-    case ESP_GATTS_DELETE_EVT:
-        break;
-
-    // --- On Service Started
-    case ESP_GATTS_START_EVT:
-        break;
-
-    // --- On Service Stopped
-    case ESP_GATTS_STOP_EVT:
-        break;
-
-    // ---------------------------------
-    // Server-Specific Events
-    // ---------------------------------
-
-    // --- On Peer Connected
-    case ESP_GATTS_OPEN_EVT:
-        break;
-
-    // --- On Peer Disconnected
-    case ESP_GATTS_CANCEL_OPEN_EVT:
-        break;
-
-    // --- On Server Closed
-    case ESP_GATTS_CLOSE_EVT:
-        break;
-
-    // --- On Server Congestion
-    case ESP_GATTS_CONGEST_EVT:
-        break;
-
-    // ---------------------------------
-    // Other Events
-    // ---------------------------------
-
-    // --- On Set MTU
-    case ESP_GATTS_MTU_EVT:
-        break;
-
-    // --- On General Confirmation Event
-    case ESP_GATTS_CONF_EVT:
         break;
 
     default:
