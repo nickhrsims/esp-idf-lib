@@ -1,7 +1,3 @@
-// SPDX-FileCopyrightText: 2023 Nicholas H.R. Sims <nickhrsims@gmail.com>
-//
-// SPDX-License-Identifier: Apache-2.0
-
 #include <stdint.h>
 #include <string.h>
 
@@ -41,8 +37,8 @@ static const neil_ble_gatts_cfg_dev_t *device_config = NULL;
 // -------------------------------------------------------------
 
 // --- Events
-static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if,
-                                esp_ble_gatts_cb_param_t *param);
+static void gatts_event_callback(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if,
+                                 esp_ble_gatts_cb_param_t *param);
 
 // -------------------------------------------------------------
 // Dependency Management
@@ -128,7 +124,7 @@ void neil_ble_gatts_start(const neil_ble_gatts_cfg_dev_t *dev_cfg) {
     // Callback Registration
     // ---------------------------------
 
-    ret = esp_ble_gatts_register_callback(gatts_event_handler);
+    ret = esp_ble_gatts_register_callback(gatts_event_callback);
     if (ret) {
         ESP_LOGE(TAG, "gatts register error, error code = %x", ret);
         return;
@@ -171,14 +167,14 @@ typedef struct {
     size_t len;
     uint16_t offset;
     neil_ble_gatts_cfg_chr_t **data;
-} handle_map_t;
+} chr_handle_map_t;
 
 /**
  * @brief       Allocate and configure a new handle-to-config map.
  */
-static handle_map_t *handle_map_init(const neil_ble_gatts_cfg_dev_t *dev_cfg,
-                                     uint16_t *handle_buffer,
-                                     uint16_t handle_buffer_len) {
+static chr_handle_map_t *chr_handle_map_init(const neil_ble_gatts_cfg_dev_t *dev_cfg,
+                                             uint16_t *handle_buffer,
+                                             uint16_t handle_buffer_len) {
 
     // --- Attributes per characteristic.
     //
@@ -193,7 +189,7 @@ static handle_map_t *handle_map_init(const neil_ble_gatts_cfg_dev_t *dev_cfg,
 
     uint8_t attr_idx = -1;
 
-    handle_map_t *map = malloc(sizeof(handle_map_t));
+    chr_handle_map_t *map = malloc(sizeof(chr_handle_map_t));
 
     map->len    = handle_buffer_len;
     map->offset = handle_space_offset;
@@ -225,12 +221,13 @@ static handle_map_t *handle_map_init(const neil_ble_gatts_cfg_dev_t *dev_cfg,
 /**
  * @brief       Get configuration by handle from a map.
  */
-static neil_ble_gatts_cfg_chr_t *handle_map_get(handle_map_t *map, uint16_t handle) {
+static neil_ble_gatts_cfg_chr_t *chr_handle_map_get(chr_handle_map_t *map,
+                                                    uint16_t handle) {
     return *(map->data + (handle - map->offset));
 }
 
 // HACK: Error Checking
-static void handle_map_deinit(handle_map_t *map) {
+static void chr_handle_map_deinit(chr_handle_map_t *map) {
 
     // Set all values in data array to null.
     size_t len = map->len;
@@ -250,12 +247,12 @@ static void handle_map_deinit(handle_map_t *map) {
 //    neil_ble_gatts_gap_init();
 
 // FIXME: Documentation
-static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if,
-                                esp_ble_gatts_cb_param_t *param) {
+static void gatts_event_callback(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_if,
+                                 esp_ble_gatts_cb_param_t *param) {
 
     static const uint8_t INSTANCE_ID = 0;
     static neil_ble_gatts_attr_db_t *attr_tab;
-    static handle_map_t *handle_map;
+    static chr_handle_map_t *handle_map;
 
     switch (event) {
 
@@ -300,8 +297,8 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
 
         ESP_LOGI(TAG, "Attribute Table Created");
 
-        handle_map = handle_map_init(device_config, param->add_attr_tab.handles,
-                                     param->add_attr_tab.num_handle);
+        handle_map = chr_handle_map_init(device_config, param->add_attr_tab.handles,
+                                         param->add_attr_tab.num_handle);
 
         ESP_LOGI(TAG, "Handle Mapping Created");
 
@@ -338,7 +335,7 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
         ESP_LOGI(TAG, "Read: Handle(%x)", param->read.handle);
         // Acquire characteristic config object
         neil_ble_gatts_cfg_chr_t *chr_cfg =
-            handle_map_get(handle_map, param->read.handle);
+            chr_handle_map_get(handle_map, param->read.handle);
 
         // Prepare response object
         esp_gatt_rsp_t rsp;
@@ -366,7 +363,7 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
         ESP_LOGI(TAG, "ESP_GATTS_WRITE_EVT, write value:");
         esp_log_buffer_hex(TAG, param->write.value, param->write.len);
 
-        handle_map_get(handle_map, param->write.handle)
+        chr_handle_map_get(handle_map, param->write.handle)
             ->on_write(param->write.value, param->write.len);
 
         break;
@@ -376,7 +373,7 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
     // --- On Application (Profile) ID Un-registration
     //
     case ESP_GATTS_UNREG_EVT:
-        handle_map_deinit(handle_map);
+        chr_handle_map_deinit(handle_map);
         neil_ble_gatts_attr_db_deinit(attr_tab);
         break;
 
