@@ -13,11 +13,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Changed
-
-- Refactored non-proprietary work with Freudensong LLC into an open-source
-  component library.
-
-- Made project complient with Apache-2.0 and RESUSE Specification 3.0
-
-- Components and examples will maintain individual changelogs
