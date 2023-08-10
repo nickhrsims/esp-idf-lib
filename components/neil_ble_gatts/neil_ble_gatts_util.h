@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Nicholas H.R. Sims <nickhrsims@gmail.com>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #ifndef neil_ble_gatts_UTIL_H_
 #define neil_ble_gatts_UTIL_H_
 

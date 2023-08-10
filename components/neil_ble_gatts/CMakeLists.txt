@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2023 Nicholas H.R. Sims <nickhrsims@gmail.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 idf_component_register(
   SRCS
     "neil_ble_gatts.h"

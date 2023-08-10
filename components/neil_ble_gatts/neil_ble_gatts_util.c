@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2023 Nicholas H.R. Sims <nickhrsims@gmail.com>
+//
+// SPDX-License-Identifier: Apache-2.0
+
 #include "esp_log.h"
 
 #include "neil_ble_gatts_util.h"

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2023 Nicholas H.R. Sims <nickhrsims@gmail.com>
+#
+# SPDX-License-Identifier: Apache-2.0
+
 CONFIG_SOC_BROWNOUT_RESET_SUPPORTED="Not determined"
 CONFIG_SOC_TWAI_BRP_DIV_SUPPORTED="Not determined"
 CONFIG_SOC_DPORT_WORKAROUND="Not determined"
