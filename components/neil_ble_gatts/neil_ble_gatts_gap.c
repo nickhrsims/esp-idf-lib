@@ -58,10 +58,10 @@ void neil_ble_gatts_gap_init(const neil_ble_gatts_cfg_dev_t *dev_cfg) {
             {
                 .set_scan_rsp    = false,
                 .include_txpower = true,
-                .min_interval = 0x0006, // slave connection min interval, Time =
-                                        // min_interval * 1.25 msec
-                .max_interval = 0x0010, // slave connection max interval, Time =
-                                        // max_interval * 1.25 msec
+                .min_interval    = 0x0006, // slave connection min interval, Time =
+                                           // min_interval * 1.25 msec
+                .max_interval = 0x0010,    // slave connection max interval, Time =
+                                           // max_interval * 1.25 msec
                 .appearance          = 0x00,
                 .manufacturer_len    = 0,
                 .p_manufacturer_data = NULL,
@@ -69,8 +69,7 @@ void neil_ble_gatts_gap_init(const neil_ble_gatts_cfg_dev_t *dev_cfg) {
                 .p_service_data      = NULL,
                 .service_uuid_len    = sizeof(adv_svc_uuid),
                 .p_service_uuid      = adv_svc_uuid,
-                .flag                = (ESP_BLE_ADV_FLAG_GEN_DISC |
-                         ESP_BLE_ADV_FLAG_BREDR_NOT_SPT),
+                .flag = (ESP_BLE_ADV_FLAG_GEN_DISC | ESP_BLE_ADV_FLAG_BREDR_NOT_SPT),
             },
 
         .adv_ext_data =
@@ -91,6 +90,8 @@ void neil_ble_gatts_gap_init(const neil_ble_gatts_cfg_dev_t *dev_cfg) {
                 .adv_filter_policy = ADV_FILTER_ALLOW_SCAN_ANY_CON_ANY,
             },
     };
+
+    esp_ble_gap_set_device_name(dev_cfg->name);
 }
 
 void neil_ble_gatts_gap_advertise() {
@@ -104,7 +105,7 @@ void neil_ble_gatts_gap_advertise() {
  *              response procedures.
  */
 void neil_ble_gatts_gap_event_handler(esp_gap_ble_cb_event_t event,
-                               esp_ble_gap_cb_param_t *param) {
+                                      esp_ble_gap_cb_param_t *param) {
 
     ESP_LOGV(TAG, "GAP_EVT, event %d\n", event);
 
@@ -154,8 +155,7 @@ void neil_ble_gatts_gap_event_handler(esp_gap_ble_cb_event_t event,
         ESP_LOGI(TAG, "ESP_GAP_BLE_OOB_REQ_EVT");
         uint8_t tk[16] = {
             1}; // If you paired with OOB, both devices need to use the same tk
-        esp_ble_oob_req_reply(param->ble_security.ble_req.bd_addr, tk,
-                              sizeof(tk));
+        esp_ble_oob_req_reply(param->ble_security.ble_req.bd_addr, tk, sizeof(tk));
         break;
     }
 
@@ -176,8 +176,7 @@ void neil_ble_gatts_gap_event_handler(esp_gap_ble_cb_event_t event,
         passkey number to the user to confirm it with the number displayed by
         peer device. */
         esp_ble_confirm_reply(param->ble_security.ble_req.bd_addr, true);
-        ESP_LOGI(TAG,
-                 "ESP_GAP_BLE_NC_REQ_EVT, the passkey Notify number:%" PRIu32,
+        ESP_LOGI(TAG, "ESP_GAP_BLE_NC_REQ_EVT, the passkey Notify number:%" PRIu32,
                  param->ble_security.key_notif.passkey);
         break;
 
@@ -211,14 +210,12 @@ void neil_ble_gatts_gap_event_handler(esp_gap_ble_cb_event_t event,
     // --- On Authentication Done
     case ESP_GAP_BLE_AUTH_CMPL_EVT: {
         esp_bd_addr_t bd_addr;
-        memcpy(bd_addr, param->ble_security.auth_cmpl.bd_addr,
-               sizeof(esp_bd_addr_t));
+        memcpy(bd_addr, param->ble_security.auth_cmpl.bd_addr, sizeof(esp_bd_addr_t));
         ESP_LOGI(TAG, "remote BD_ADDR: %08x%04x",
                  (bd_addr[0] << 24) + (bd_addr[1] << 16) + (bd_addr[2] << 8) +
                      bd_addr[3],
                  (bd_addr[4] << 8) + bd_addr[5]);
-        ESP_LOGI(TAG, "address type = %d",
-                 param->ble_security.auth_cmpl.addr_type);
+        ESP_LOGI(TAG, "address type = %d", param->ble_security.auth_cmpl.addr_type);
         ESP_LOGI(TAG, "pair status = %s",
                  param->ble_security.auth_cmpl.success ? "success" : "fail");
         if (!param->ble_security.auth_cmpl.success) {
@@ -310,10 +307,8 @@ void neil_ble_gatts_gap_configure_security() {
                                    sizeof(uint32_t));
     esp_ble_gap_set_security_param(ESP_BLE_SM_AUTHEN_REQ_MODE, &auth_req,
                                    sizeof(uint8_t));
-    esp_ble_gap_set_security_param(ESP_BLE_SM_IOCAP_MODE, &iocap,
-                                   sizeof(uint8_t));
-    esp_ble_gap_set_security_param(ESP_BLE_SM_MAX_KEY_SIZE, &key_size,
-                                   sizeof(uint8_t));
+    esp_ble_gap_set_security_param(ESP_BLE_SM_IOCAP_MODE, &iocap, sizeof(uint8_t));
+    esp_ble_gap_set_security_param(ESP_BLE_SM_MAX_KEY_SIZE, &key_size, sizeof(uint8_t));
     esp_ble_gap_set_security_param(ESP_BLE_SM_ONLY_ACCEPT_SPECIFIED_SEC_AUTH,
                                    &auth_option, sizeof(uint8_t));
     esp_ble_gap_set_security_param(ESP_BLE_SM_OOB_SUPPORT, &oob_support,
@@ -324,14 +319,11 @@ void neil_ble_gatts_gap_configure_security() {
     a master, the response key means you hope which types of key of the slave
     should distribute to you, and the init key means which key you can
     distribute to the slave. */
-    esp_ble_gap_set_security_param(ESP_BLE_SM_SET_INIT_KEY, &init_key,
-                                   sizeof(uint8_t));
-    esp_ble_gap_set_security_param(ESP_BLE_SM_SET_RSP_KEY, &rsp_key,
-                                   sizeof(uint8_t));
+    esp_ble_gap_set_security_param(ESP_BLE_SM_SET_INIT_KEY, &init_key, sizeof(uint8_t));
+    esp_ble_gap_set_security_param(ESP_BLE_SM_SET_RSP_KEY, &rsp_key, sizeof(uint8_t));
 }
 
-static void adv_svc_uuid_merge(const neil_ble_gatts_cfg_dev_t *dev_cfg,
-                               uint8_t *uuid) {
+static void adv_svc_uuid_merge(const neil_ble_gatts_cfg_dev_t *dev_cfg, uint8_t *uuid) {
 
     ESP_LOGI(TAG, "Merging Service UUIDs for advertising");
 
