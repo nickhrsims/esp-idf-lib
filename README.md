@@ -8,7 +8,8 @@ SPDX-License-Identifier: Apache-2.0
 
 Built with :heart: using the [Espressif ESP32 Audio Development Framework](https://github.com/espressif/esp-adf.git).
 
-# License
+# Licensing
 
-Significant portions of the components and examples are taken from Espressif's components/examples. See citations at the top of select files for case-by-case modifications of Espressif authored source.
- 
+Access to original works are hereby granted under the Apache-2.0 License.
+
+All work found in this project was written with the assistance of, and inspiriation provided by, Espressif's publically available open-source project repositories.
