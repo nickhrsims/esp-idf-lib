@@ -14,7 +14,7 @@
 #include "esp_bt_defs.h"
 
 // -------------------------------------------------------------
-// Freudensong UUID System
+// Generic UUID System
 // -------------------------------------------------------------
 //
 // Base UUID Auxiliary Macro
